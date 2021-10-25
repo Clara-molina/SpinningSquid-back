@@ -1,6 +1,5 @@
 vendor
 wp
-content
 composer.lock
 wp-config.php
 .htaccess
