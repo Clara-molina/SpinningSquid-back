@@ -1,0 +1,10 @@
+vendor
+wp
+composer.lock
+wp-config.php
+.htaccess
+
+content/*
+content/plugins/*
+!content/plugins/
+!content/plugins/spinning-squid

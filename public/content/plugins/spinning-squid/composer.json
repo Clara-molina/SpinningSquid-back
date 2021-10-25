@@ -1,0 +1,10 @@
+{
+    "autoload": {
+        "psr-4" : {
+            "SpinningSquid\\" : "./class"
+        }
+    },
+    "config": {
+        "vendor-dir": "vendor-spinningsquid"
+    }
+}
