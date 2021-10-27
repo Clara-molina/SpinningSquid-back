@@ -7,8 +7,11 @@
 require __DIR__ . '/vendor-spinningsquid/autoload.php';
 
 use SpinningSquid\Plugin;
+use SpinningSquid\API;
 
 $spinningsquid= new Plugin;
+
+$api = new API;
 
 // Méthode que l'on "branche" sur l'activation du plugin
 // J'utilise ici la notation [$monObjet, 'maMéthode']

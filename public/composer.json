@@ -26,7 +26,8 @@
         "wpackagist-plugin/custom-post-type-ui": "^1.9",
         "wpackagist-plugin/user-role-editor": "^4.60",
         "wpackagist-plugin/view-admin-as": "^1.8",
-        "wpackagist-plugin/advanced-custom-fields": "^5.9"
+        "wpackagist-plugin/advanced-custom-fields": "^5.9",
+        "wpackagist-plugin/jwt-authentication-for-wp-rest-api": "^1.2"
     },
 
     "scripts": {
