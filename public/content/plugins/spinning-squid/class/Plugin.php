@@ -16,7 +16,7 @@ class Plugin
     {
         register_post_type('article', // nom du cpt 
             [
-                'label' => 'Article',
+                'label' => 'Article Forum',
                 'public' => true,
                 'hierarchical' => false,
                 'menu_icon' => 'dashicons-welcome-write-blog',
