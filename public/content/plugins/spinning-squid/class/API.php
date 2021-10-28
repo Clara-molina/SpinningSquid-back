@@ -23,7 +23,25 @@ class API {
                 'methods' => 'post',
                 'callback' => [$this, 'newUSerSave']
             ]
-            );
+        );
+
+        register_rest_route(
+            'spinningsquid/v1',
+            '/updateuser',
+            [
+                'methods' => 'post',
+                'callback' => [$this, 'updateUser']
+            ]
+        );
+
+        register_rest_route(
+            'spinningsquid/v1',
+            '/deleteuser',
+            [
+                'methods' => 'post',
+                'callback' => [$this, 'deleteUser']
+            ]
+        );
     }
 
     // Sauvegarde un nouvel utilisateur 
@@ -52,4 +70,41 @@ class API {
             ];
         }
     }
+
+    // Modifier un utilisateur existant 
+    public function updateUser(WP_REST_Request $request)
+    {
+        $userID = get_current_user_id();
+
+        $firstname = $request->get_param('firstname'); 
+        $lastname = $request->get_param('lastname'); 
+        $email = $request->get_param('email');
+        $password = $request->get_param('password');
+        $address = $request->get_param('address');
+
+        $userData = array(
+            'first_name' => $firstname,
+            'last_name' => $lastname,
+            'user_email' => $email,
+            'user_pass' => $password,
+        );
+
+        update_user_meta($userID, $userData, true);
+
+        add_user_meta($userID, 'address', $address);
+    }
+
+    // Supprimer un utilisateur 
+    public function deleteUser()
+    {
+        $userID = get_current_user_id();
+
+        wp_delete_user($userID);
+    }
+
+    // Ajouter un skatepark 
+
+    // Modifier un skatepark
+
+    // Suppprimer un skatepark 
 }
