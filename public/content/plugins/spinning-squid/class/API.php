@@ -24,47 +24,41 @@ class API {
                 'callback' => [$this, 'newUSerSave']
             ]
         );
-
-        register_rest_route(
-            'spinningsquid/v1',
-            '/updateuser',
-            [
-                'methods' => 'post',
-                'callback' => [$this, 'updateUser']
-            ]
-        );
-
-        register_rest_route(
-            'spinningsquid/v1',
-            '/deleteuser',
-            [
-                'methods' => 'post',
-                'callback' => [$this, 'deleteUser']
-            ]
-        );
-
-        register_rest_route(
-            'spinningsquid/v1',
-            '/newskatepark-save',
-            [
-                'methods' => 'post',
-                'callback' => [$this, 'newSkateparkSave']
-            ]
-        );
     }
 
     // Sauvegarder un nouvel utilisateur 
     public function newUSerSave(WP_REST_Request $request)
     {
         $username = $request->get_param('username'); 
+        $lastname = $request->get_param('lastname'); 
+        $firstname = $request->get_param('firstname'); 
+        $street = $request->get_param('street'); 
+        $zipcode = $request->get_param('zipcode'); 
+        $city = $request->get_param('city'); 
         $email = $request->get_param('email');
         $password = $request->get_param('password');
 
-        $userID = wp_create_user($username, $password, $email);
+        //$userID = wp_create_user($username, $password, $email);
 
+        
+        $userData = [
+            'user_login' => $username,
+            'first_name' => $firstname,
+            'last_name' => $lastname,
+            'user_pass' => $password,
+            'user_email' => $email,
+        ];
+        
+ 
+        $userID = wp_insert_user($userData);
+        
         if(is_int($userID)) {
 
             new WP_User($userID);
+
+            add_user_meta($userID, 'street', $street);
+            add_user_meta($userID, 'zipcode', $zipcode);
+            add_user_meta($userID, 'city', $city);
 
             return [
                 'succes' => true,
@@ -85,22 +79,28 @@ class API {
     {
         $userID = get_current_user_id();
 
-        $firstname = $request->get_param('firstname'); 
+        $username = $request->get_param('username'); 
         $lastname = $request->get_param('lastname'); 
+        $firstname = $request->get_param('firstname'); 
+        $street = $request->get_param('street'); 
+        $zipcode = $request->get_param('zipcode'); 
+        $city = $request->get_param('city'); 
         $email = $request->get_param('email');
         $password = $request->get_param('password');
-        $address = $request->get_param('address');
 
         $userData = array(
+            'user_login' => $username,
             'first_name' => $firstname,
             'last_name' => $lastname,
+            'street '=> $street,
+            'zipcode' => $zipcode,
+            'city' => $city,
             'user_email' => $email,
             'user_pass' => $password,
+            'user_email' => $email,
         );
 
         update_user_meta($userID, $userData, false);
-
-        add_user_meta($userID, 'address', $address);
     }
 
     // Supprimer un utilisateur 
