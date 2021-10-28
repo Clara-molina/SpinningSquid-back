@@ -103,6 +103,40 @@ class API {
     }
 
     // Ajouter un skatepark 
+    public function skateparkSave(WP_REST_Request $request)
+    {
+        
+        $title = $request->get_param('title'); 
+        $description = $request->get_param('description');
+
+        $user = wp_get_current_user();
+        if(
+            in_array('contributor', (array) $user->roles) ||
+            in_array('administrator', (array) $user->roles))
+        {
+
+            $skateparkCreateResult = wp_insert_post(
+                [
+                    'post_title' => $title,
+                    'post_content' => $description,
+                    'post_status' => 'publish',
+                    'post_type' => 'recipe'
+                ]
+            );
+
+            return [
+                'success' => true,
+                'title' => $title,
+                'description' => $description,
+                'user' => $user,
+                'recipe-id'=> $skateparkCreateResult
+            ];
+        }
+
+        return [
+            'success' => false,
+        ];
+    }
 
     // Modifier un skatepark
 
