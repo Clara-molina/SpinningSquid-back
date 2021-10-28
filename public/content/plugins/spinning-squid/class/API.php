@@ -2,6 +2,7 @@
 
 namespace SpinningSquid;
 
+use SpinningSquid\Models\NewsLetterCustomerModel;
 use WP_REST_Request;
 use WP_USer;
 
@@ -27,10 +28,10 @@ class API {
 
         register_rest_route(
             'spinningsquid/v1',
-            '/newsletter-save',
+            '/newsletter',
             [
                 'methods' => 'post',
-                'callback' => [$this, 'newsLetterSave']
+                'callback' => [$this, 'newsLetter']
             ]
             );
     }
@@ -63,10 +64,18 @@ class API {
     }
 
     // Save email in table custom newsletter
-    public function newsLetterSave(WP_REST_Request $request)
+    public function newsLetter(WP_REST_Request $request)
     {
-        $email = $request->get_param('username');
+        $email = $request->get_param('email');
 
-        return $email;
+        if($email) {
+
+            new NewsLetterCustomerModel($email);
+        
+            return [
+            'succes' => true,
+            'email' => $email,
+            ];
+        }
     }
 }
