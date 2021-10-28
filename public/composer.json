@@ -26,20 +26,12 @@
         "wpackagist-plugin/custom-post-type-ui": "^1.9",
         "wpackagist-plugin/user-role-editor": "^4.60",
         "wpackagist-plugin/view-admin-as": "^1.8",
-<<<<<<< HEAD
-        "wpackagist-plugin/advanced-custom-fields": "^5.9"
-=======
         "wpackagist-plugin/advanced-custom-fields": "^5.9",
         "wpackagist-plugin/jwt-authentication-for-wp-rest-api": "^1.2"
->>>>>>> Dev
     },
 
     "scripts": {
         "reload": [
-<<<<<<< HEAD
-            
-=======
->>>>>>> Dev
         ],
         "activate-theme": "wp theme activate",
         "activate-plugins": "wp plugin activate --all",
