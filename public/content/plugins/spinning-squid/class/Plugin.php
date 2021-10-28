@@ -2,6 +2,8 @@
 
 namespace SpinningSquid;
 
+use SpinningSquid\Models\NewsLetterCustomer;
+
 class Plugin
 {
     public function __construct()
@@ -81,6 +83,20 @@ class Plugin
                 'show_in_rest' => true
             ]
         );
+    }
+
+    public function activate()
+    {
+        // création de la table NewsLetter_customer
+        $projectCustomerModel = new NewsLetterCustomerModel();
+        $projectCustomerModel->createTable();
+    }
+
+    public function deactivate()
+    {
+        // suppression de la table NewsLetter_customer
+        $projectCustomerModel = new NewsLetterCustomerModel();
+        $projectCustomerModel->dropTable();
     }
     
 }
