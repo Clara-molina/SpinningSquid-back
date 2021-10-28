@@ -57,6 +57,11 @@ class API {
     public function newUSerSave(WP_REST_Request $request)
     {
         $username = $request->get_param('username'); 
+        $lastname = $request->get_param('lastname');
+        $firstname = $request->get_param('firstname');
+        $street = $request->get_param('street');
+        $zipcode = $request->get_param('zipcode');
+        $city = $request->get_param('city');
         $email = $request->get_param('email');
         $password = $request->get_param('password');
 
