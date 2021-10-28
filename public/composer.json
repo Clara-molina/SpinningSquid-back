@@ -31,8 +31,7 @@
 
     "scripts": {
         "reload": [
-            "wp plugin deactivate oprofile-cours",
-            "wp plugin activate oprofile-cours"
+            
         ],
         "activate-theme": "wp theme activate",
         "activate-plugins": "wp plugin activate --all",
