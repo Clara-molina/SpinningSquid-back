@@ -42,9 +42,18 @@ class API {
                 'callback' => [$this, 'deleteUser']
             ]
         );
+
+        register_rest_route(
+            'spinningsquid/v1',
+            '/newskatepark-save',
+            [
+                'methods' => 'post',
+                'callback' => [$this, 'newSkateparkSave']
+            ]
+        );
     }
 
-    // Sauvegarde un nouvel utilisateur 
+    // Sauvegarder un nouvel utilisateur 
     public function newUSerSave(WP_REST_Request $request)
     {
         $username = $request->get_param('username'); 
@@ -89,7 +98,7 @@ class API {
             'user_pass' => $password,
         );
 
-        update_user_meta($userID, $userData, true);
+        update_user_meta($userID, $userData, false);
 
         add_user_meta($userID, 'address', $address);
     }
@@ -120,7 +129,7 @@ class API {
                     'post_title' => $title,
                     'post_content' => $description,
                     'post_status' => 'publish',
-                    'post_type' => 'recipe'
+                    'post_type' => 'skatepark'
                 ]
             );
 
@@ -139,6 +148,37 @@ class API {
     }
 
     // Modifier un skatepark
+    public function updateSkatepark(WP_REST_Request $request)
+    {
+        
+        $title = $request->get_param('title'); 
+        $description = $request->get_param('description');
+        $id = $request->get_param('id');
+
+        $user = wp_get_current_user();
+        if(
+            in_array('contributor', (array) $user->roles) ||
+            in_array('administrator', (array) $user->roles))
+        {
+
+            update_post_meta($id, 'post_title', $title);
+            update_post_meta($id, 'post_content', $description);
+        
+            return [
+                'success' => true,
+            ];
+        }
+
+        return [
+            'success' => false,
+        ];
+    }
 
     // Suppprimer un skatepark 
+    public function deleteSkatepark(WP_REST_Request $request)
+    {
+        $id = $request->get_param('id');
+
+        wp_delete_post($id);
+    }
 }
