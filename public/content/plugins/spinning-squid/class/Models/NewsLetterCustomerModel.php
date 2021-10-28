@@ -7,7 +7,7 @@ namespace SpinningSquid\Models;
 class NewsLetterCustomerModel extends CoreModel
 {
 
-    protected $tableName = "NewsLetter_customer";
+    protected $tableName = "newsLetter_customer";
 
 
     public function _getTableName()

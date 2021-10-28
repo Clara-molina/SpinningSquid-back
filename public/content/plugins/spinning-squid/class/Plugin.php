@@ -2,7 +2,7 @@
 
 namespace SpinningSquid;
 
-use SpinningSquid\Models\NewsLetterCustomer;
+use SpinningSquid\Models\NewsLetterCustomerModel;
 
 class Plugin
 {
@@ -95,8 +95,8 @@ class Plugin
     public function deactivate()
     {
         // suppression de la table NewsLetter_customer
-        $projectCustomerModel = new NewsLetterCustomerModel();
-        $projectCustomerModel->dropTable();
+        //$projectCustomerModel = new NewsLetterCustomerModel();
+        //$projectCustomerModel->dropTable();
     }
     
 }

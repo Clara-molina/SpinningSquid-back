@@ -24,6 +24,15 @@ class API {
                 'callback' => [$this, 'newUSerSave']
             ]
             );
+
+        register_rest_route(
+            'spinningsquid/v1',
+            '/newsletter-save',
+            [
+                'methods' => 'post',
+                'callback' => [$this, 'newsLetterSave']
+            ]
+            );
     }
 
     // Sauvegarde un nouvel utilisateur 
@@ -51,5 +60,13 @@ class API {
                 'succes' => false
             ];
         }
+    }
+
+    // Save email in table custom newsletter
+    public function newsLetterSave(WP_REST_Request $request)
+    {
+        $email = $request->get_param('username');
+
+        return $email;
     }
 }
