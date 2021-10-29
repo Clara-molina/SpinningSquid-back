@@ -52,6 +52,15 @@ class API {
                 'callback' => [$this, 'newSkateparkSave']
             ]
         );
+
+        register_rest_route(
+            'spinningsquid/v1',
+            '/newsletter',
+            [
+                'methods' => 'post',
+                'callback' => [$this, 'newsLetter']
+            ]
+        );
     }
 
     // Sauvegarder un nouvel utilisateur 
@@ -186,5 +195,21 @@ class API {
         $id = $request->get_param('id');
 
         wp_delete_post($id);
+    }
+
+    // Save email in table custom newsletter
+    public function newsLetter(WP_REST_Request $request)
+    {
+        $email = $request->get_param('email');
+
+        if($email) {
+            $newsletterModel =   new NewsLetterCustomerModel();
+            $newsletterModel->insert($email);
+
+            return [
+                'succes' => true,
+                'email' => $email
+            ];
+        }
     }
 }
