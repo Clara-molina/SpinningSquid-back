@@ -69,12 +69,12 @@ class API {
         $email = $request->get_param('email');
 
         if($email) {
+            $newsletterModel =   new NewsLetterCustomerModel();
+            $newsletterModel->insert($email);
 
-            new NewsLetterCustomerModel($email);
-        
             return [
-            'succes' => true,
-            'email' => $email,
+                'succes' => true,
+                'email' => $email
             ];
         }
     }
