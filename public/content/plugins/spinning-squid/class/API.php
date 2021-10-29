@@ -132,7 +132,9 @@ class API {
                     'post_type' => 'skatepark'
                 ]
             );
-
+            
+            //add_post_meta();
+            
             return [
                 'success' => true,
                 'title' => $title,
