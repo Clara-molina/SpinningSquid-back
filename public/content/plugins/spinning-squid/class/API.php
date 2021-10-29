@@ -24,18 +24,6 @@ class API {
                 'methods' => 'post',
                 'callback' => [$this, 'newUSerSave']
             ]
-<<<<<<< HEAD
-            );
-
-        register_rest_route(
-            'spinningsquid/v1',
-            '/newsletter',
-            [
-                'methods' => 'post',
-                'callback' => [$this, 'newsLetter']
-            ]
-            );
-=======
         );
 
         register_rest_route(
@@ -64,7 +52,6 @@ class API {
                 'callback' => [$this, 'newSkateparkSave']
             ]
         );
->>>>>>> Dev
     }
 
     // Sauvegarder un nouvel utilisateur 
@@ -99,22 +86,6 @@ class API {
         }
     }
 
-<<<<<<< HEAD
-    // Save email in table custom newsletter
-    public function newsLetter(WP_REST_Request $request)
-    {
-        $email = $request->get_param('email');
-
-        if($email) {
-            $newsletterModel =   new NewsLetterCustomerModel();
-            $newsletterModel->insert($email);
-
-            return [
-                'succes' => true,
-                'email' => $email
-            ];
-        }
-=======
     // Modifier un utilisateur existant 
     public function updateUser(WP_REST_Request $request)
     {
@@ -215,6 +186,5 @@ class API {
         $id = $request->get_param('id');
 
         wp_delete_post($id);
->>>>>>> Dev
     }
 }
