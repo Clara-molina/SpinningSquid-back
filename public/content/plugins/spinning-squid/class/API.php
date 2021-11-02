@@ -191,7 +191,7 @@ class API
                 }
             
                 // nom de mon image
-                $name = "{$title}-{uniqid}.{$type}";
+                $name = $title . '-' . uniqid() . $type;
                 // nom de mon image (sans l'extension)
                 $filename = basename( $name );
                 // je demande à WP les chemins de téléchargement 
@@ -304,7 +304,7 @@ class API
                 }
             
                 // nom de mon image
-                $name = "{$title}-{uniqid}.{$type}";
+                $name = $title . '-' . uniqid() . $type;
                 // nom de mon image (sans l'extension)
                 $filename = basename( $name );
                 // je demande à WP les chemins de téléchargement 
