@@ -5,7 +5,8 @@ namespace SpinningSquid;
 use WP_REST_Request;
 use WP_USer;
 
-class API {
+class API
+{
 
     public function __construct()
     {
@@ -24,23 +25,32 @@ class API {
                 'callback' => [$this, 'newUSerSave']
             ]
         );
+
+        register_rest_route(
+            'spinningsquid/v1',
+            '/newskatepark-save',
+            [
+                'methods' => 'post',
+                'callback' => [$this, 'skateparkSave']
+            ]
+        );
     }
 
     // Sauvegarder un nouvel utilisateur 
     public function newUSerSave(WP_REST_Request $request)
     {
-        $username = $request->get_param('username'); 
-        $lastname = $request->get_param('lastname'); 
-        $firstname = $request->get_param('firstname'); 
-        $street = $request->get_param('street'); 
-        $zipcode = $request->get_param('zipcode'); 
-        $city = $request->get_param('city'); 
+        $username = $request->get_param('username');
+        $lastname = $request->get_param('lastname');
+        $firstname = $request->get_param('firstname');
+        $street = $request->get_param('street');
+        $zipcode = $request->get_param('zipcode');
+        $city = $request->get_param('city');
         $email = $request->get_param('email');
         $password = $request->get_param('password');
 
         //$userID = wp_create_user($username, $password, $email);
 
-        
+
         $userData = [
             'user_login' => $username,
             'first_name' => $firstname,
@@ -48,13 +58,15 @@ class API {
             'user_pass' => $password,
             'user_email' => $email,
         ];
-        
- 
-        $userID = wp_insert_user($userData);
-        
-        if(is_int($userID)) {
 
-            new WP_User($userID);
+
+        $userID = wp_insert_user($userData);
+
+        if (is_int($userID)) {
+
+            $user = new WP_User($userID);
+
+            $user->set_role('contributor');
 
             add_user_meta($userID, 'street', $street);
             add_user_meta($userID, 'zipcode', $zipcode);
@@ -79,12 +91,12 @@ class API {
     {
         $userID = get_current_user_id();
 
-        $username = $request->get_param('username'); 
-        $lastname = $request->get_param('lastname'); 
-        $firstname = $request->get_param('firstname'); 
-        $street = $request->get_param('street'); 
-        $zipcode = $request->get_param('zipcode'); 
-        $city = $request->get_param('city'); 
+        $username = $request->get_param('username');
+        $lastname = $request->get_param('lastname');
+        $firstname = $request->get_param('firstname');
+        $street = $request->get_param('street');
+        $zipcode = $request->get_param('zipcode');
+        $city = $request->get_param('city');
         $email = $request->get_param('email');
         $password = $request->get_param('password');
 
@@ -92,7 +104,7 @@ class API {
             'user_login' => $username,
             'first_name' => $firstname,
             'last_name' => $lastname,
-            'street '=> $street,
+            'street ' => $street,
             'zipcode' => $zipcode,
             'city' => $city,
             'user_email' => $email,
@@ -114,56 +126,118 @@ class API {
     // Ajouter un skatepark 
     public function skateparkSave(WP_REST_Request $request)
     {
-        
-        $title = $request->get_param('title'); 
-        $description = $request->get_param('description');
+        $skatepark = $request->get_param('skatepark');
+        $pumptrack = $request->get_param('pumptrack');
+        $street = $request->get_param('street');
+        $street = $request->get_param('street');
+        $zipcode = $request->get_param('zipcode');
+        $city = $request->get_param('city');
+        $parking = $request->get_param('parking');
+        $water = $request->get_param('water');
+        $trashcan = $request->get_param('trashcan');
+        $lighting = $request->get_param('lighting');
+        $table = $request->get_param('table');
+        $benche = $request->get_param('benche');
+        $state = $request->get_param('state');
+
+        //image est envoyé par le front en base64
+        $images = $request->get_param('image');
 
         $user = wp_get_current_user();
+
+        // Je vérie que l'user a le bon rôle (donc bien inscrit)
         if(
             in_array('contributor', (array) $user->roles) ||
             in_array('administrator', (array) $user->roles))
         {
-
             $skateparkCreateResult = wp_insert_post(
                 [
-                    'post_title' => $title,
-                    'post_content' => $description,
+                    'post_title' => 'test',
                     'post_status' => 'publish',
                     'post_type' => 'skatepark'
                 ]
             );
 
-            return [
-                'success' => true,
-                'title' => $title,
-                'description' => $description,
-                'user' => $user,
-                'recipe-id'=> $skateparkCreateResult
-            ];
+            // Si le post skatepark est créé alors...
+            if (is_int($skateparkCreateResult)) {
+
+                // J'ajoute les meta data
+                add_user_meta($user->ID, 'skatepark', $skatepark);
+                add_user_meta($user->ID, 'pumptrack', $pumptrack);
+                add_user_meta($user->ID, 'street', $street);
+                add_user_meta($user->ID, 'zipcode', $zipcode);
+                add_user_meta($user->ID, 'city', $city);
+                add_user_meta($user->ID, 'parking', $parking);
+                add_user_meta($user->ID, 'water', $water);
+                add_user_meta($user->ID, 'trashcan', $trashcan);
+                add_user_meta($user->ID, 'lighting', $lighting);
+                add_user_meta($user->ID, 'table', $table);
+                add_user_meta($user->ID, 'benche', $benche);
+                add_user_meta($user->ID, 'state', $state);        
+
+                // Je récupère la base64 et le type de l'image
+                list($type, $data) = explode(';', $images);
+                list(, $data)      = explode(',', $data);
+                list(, $type) = explode('/', $type);
+            
+                // Si l'image a le bont type alors...
+                if (!in_array($type, ['jpg', 'jpeg','png'])) {
+                    echo "nop!";
+                } else {
+                    echo "yes!";
+                    $data = base64_decode($data);
+                
+                    // Je reconstruit mon image
+                    file_put_contents("img.{$type}", $data);
+                }
+            
+                $name = "img.{$type}";
+                $wp_upload_dir = wp_upload_dir();
+
+                $attachment = array(
+                'guid'=> $wp_upload_dir['url'] . '/' . basename($name),
+                'post_mime_type' => "image/{$type}",
+                'post_title' => 'test',
+                'post_content' => '',
+                'post_status' => 'inherit'
+                );
+
+                $image_id = wp_insert_attachment($attachment, $name, $skateparkCreateResult);
+
+                // Make sure that this file is included, as wp_generate_attachment_metadata() depends on it.
+                require_once(ABSPATH . '../../../../wp/wp-admin/includes/image.php');
+                // Generate the metadata for the attachment, and update the database record.
+                $attach_data = wp_generate_attachment_metadata($image_id, $name);
+                wp_update_attachment_metadata($image_id, $attach_data);
+
+                return [
+                    'succes' => true,
+                ];
+            }
         }
 
         return [
-            'success' => false,
+            'succes' => false,
         ];
     }
 
     // Modifier un skatepark
     public function updateSkatepark(WP_REST_Request $request)
     {
-        
-        $title = $request->get_param('title'); 
+
+        $title = $request->get_param('title');
         $description = $request->get_param('description');
         $id = $request->get_param('id');
 
         $user = wp_get_current_user();
-        if(
+        if (
             in_array('contributor', (array) $user->roles) ||
-            in_array('administrator', (array) $user->roles))
-        {
+            in_array('administrator', (array) $user->roles)
+        ) {
 
             update_post_meta($id, 'post_title', $title);
             update_post_meta($id, 'post_content', $description);
-        
+
             return [
                 'success' => true,
             ];
