@@ -2,6 +2,7 @@
 
 namespace SpinningSquid;
 
+use SpinningSquid\Models\NewsLetterCustomerModel;
 use WP_REST_Request;
 use WP_USer;
 
@@ -32,6 +33,15 @@ class API
             [
                 'methods' => 'post',
                 'callback' => [$this, 'skateparkSave']
+            ]
+        );
+
+        register_rest_route(
+            'spinningsquid/v1',
+            '/newsletter',
+            [
+                'methods' => 'post',
+                'callback' => [$this, 'newsLetter']
             ]
         );
     }
@@ -355,4 +365,24 @@ class API
 
         wp_delete_post($id);
     }
+
 }
+
+
+    // Save email in table custom newsletter
+    public function newsLetter(WP_REST_Request $request)
+    {
+        $email = $request->get_param('email');
+
+        if($email) {
+            $newsletterModel =   new NewsLetterCustomerModel();
+            $newsletterModel->insert($email);
+
+            return [
+                'succes' => true,
+                'email' => $email
+            ];
+        }
+    }
+}
+
