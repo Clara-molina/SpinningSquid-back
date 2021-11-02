@@ -126,10 +126,11 @@ class API
     // Ajouter un skatepark 
     public function skateparkSave(WP_REST_Request $request)
     {
+        $title = $request->get_param('title');
         $skatepark = $request->get_param('skatepark');
         $pumptrack = $request->get_param('pumptrack');
         $street = $request->get_param('street');
-        $street = $request->get_param('street');
+        $streetspot = $request->get_param('streetspot');
         $zipcode = $request->get_param('zipcode');
         $city = $request->get_param('city');
         $parking = $request->get_param('parking');
@@ -141,18 +142,15 @@ class API
         $state = $request->get_param('state');
 
         //image est envoyé par le front en base64
-        $images = $request->get_param('image');
+        $image = $request->get_param('image');
 
         $user = wp_get_current_user();
 
         // Je vérie que l'user a le bon rôle (donc bien inscrit)
-        if(
-            in_array('contributor', (array) $user->roles) ||
-            in_array('administrator', (array) $user->roles))
-        {
+      
             $skateparkCreateResult = wp_insert_post(
                 [
-                    'post_title' => 'test',
+                    'post_title' => $title,
                     'post_status' => 'publish',
                     'post_type' => 'skatepark'
                 ]
@@ -162,59 +160,75 @@ class API
             if (is_int($skateparkCreateResult)) {
 
                 // J'ajoute les meta data
-                add_user_meta($user->ID, 'skatepark', $skatepark);
-                add_user_meta($user->ID, 'pumptrack', $pumptrack);
-                add_user_meta($user->ID, 'street', $street);
-                add_user_meta($user->ID, 'zipcode', $zipcode);
-                add_user_meta($user->ID, 'city', $city);
-                add_user_meta($user->ID, 'parking', $parking);
-                add_user_meta($user->ID, 'water', $water);
-                add_user_meta($user->ID, 'trashcan', $trashcan);
-                add_user_meta($user->ID, 'lighting', $lighting);
-                add_user_meta($user->ID, 'table', $table);
-                add_user_meta($user->ID, 'benche', $benche);
-                add_user_meta($user->ID, 'state', $state);        
+                update_post_meta($skateparkCreateResult, 'skatepark', $skatepark);
+                update_post_meta($skateparkCreateResult, 'pumptrack', $pumptrack);
+                update_post_meta($skateparkCreateResult, 'streetspot', $streetspot);
+                update_post_meta($skateparkCreateResult, 'street', $street);
+                update_post_meta($skateparkCreateResult, 'zipcode', $zipcode);
+                update_post_meta($skateparkCreateResult, 'city', $city);
+                update_post_meta($skateparkCreateResult, 'parking', $parking);
+                update_post_meta($skateparkCreateResult, 'water', $water);
+                update_post_meta($skateparkCreateResult, 'trashcan', $trashcan);
+                update_post_meta($skateparkCreateResult, 'lighting', $lighting);
+                update_post_meta($skateparkCreateResult, 'table', $table);
+                update_post_meta($skateparkCreateResult, 'benche', $benche);
+                update_post_meta($skateparkCreateResult, 'state', $state);        
 
                 // Je récupère la base64 et le type de l'image
-                list($type, $data) = explode(';', $images);
+                list($type, $data) = explode(';', $image);
                 list(, $data)      = explode(',', $data);
                 list(, $type) = explode('/', $type);
+
             
                 // Si l'image a le bont type alors...
                 if (!in_array($type, ['jpg', 'jpeg','png'])) {
                     echo "nop!";
                 } else {
                     echo "yes!";
-                    $data = base64_decode($data);
-                
-                    // Je reconstruit mon image
-                    file_put_contents("img.{$type}", $data);
+                    $dataDecoded = base64_decode($data);
+                    //$datajson = $dataDecoded;
+
                 }
             
-                $name = "img.{$type}";
-                $wp_upload_dir = wp_upload_dir();
+                // nom de mon image
+                $name = "{$title}-{uniqid}.{$type}";
+                // nom de mon image (sans l'extension)
+                $filename = basename( $name );
+                // je demande à WP les chemins de téléchargement 
+                $upload_dir = wp_upload_dir();
+
+                // si il n'existe pas, WP va me créer un dossier (ici uploads/2021/)
+                if ( wp_mkdir_p( $upload_dir['path'] ) ) {
+                    $file = $upload_dir['path'] . '/' . $filename;
+                }
+                else {
+                    $file = $upload_dir['basedir'] . '/' . $filename;
+                }
+                
+                // Je reconstruit mon image
+                file_put_contents( $file, $dataDecoded );
 
                 $attachment = array(
-                'guid'=> $wp_upload_dir['url'] . '/' . basename($name),
+                //'guid'=> $upload_dir['url'] . '/' . basename($name),
                 'post_mime_type' => "image/{$type}",
                 'post_title' => 'test',
                 'post_content' => '',
                 'post_status' => 'inherit'
                 );
 
-                $image_id = wp_insert_attachment($attachment, $name, $skateparkCreateResult);
+                $image_id = wp_insert_attachment($attachment, $file, $skateparkCreateResult);
 
                 // Make sure that this file is included, as wp_generate_attachment_metadata() depends on it.
-                require_once(ABSPATH . '../../../../wp/wp-admin/includes/image.php');
+                require_once(ABSPATH . 'wp-admin/includes/image.php');
                 // Generate the metadata for the attachment, and update the database record.
-                $attach_data = wp_generate_attachment_metadata($image_id, $name);
+                $attach_data = wp_generate_attachment_metadata($image_id, $file);
                 wp_update_attachment_metadata($image_id, $attach_data);
 
                 return [
                     'succes' => true,
-                ];
+                    //'data' => $datajson
+                 ];
             }
-        }
 
         return [
             'succes' => false,
@@ -226,25 +240,111 @@ class API
     {
 
         $title = $request->get_param('title');
-        $description = $request->get_param('description');
-        $id = $request->get_param('id');
+        $skatepark = $request->get_param('skatepark');
+        $pumptrack = $request->get_param('pumptrack');
+        $street = $request->get_param('street');
+        $streetspot = $request->get_param('streetspot');
+        $zipcode = $request->get_param('zipcode');
+        $city = $request->get_param('city');
+        $parking = $request->get_param('parking');
+        $water = $request->get_param('water');
+        $trashcan = $request->get_param('trashcan');
+        $lighting = $request->get_param('lighting');
+        $table = $request->get_param('table');
+        $benche = $request->get_param('benche');
+        $state = $request->get_param('state');
+
+        //image est envoyé par le front en base64
+        $image = $request->get_param('image');
 
         $user = wp_get_current_user();
-        if (
-            in_array('contributor', (array) $user->roles) ||
-            in_array('administrator', (array) $user->roles)
-        ) {
 
-            update_post_meta($id, 'post_title', $title);
-            update_post_meta($id, 'post_content', $description);
+        // Je vérie que l'user a le bon rôle (donc bien inscrit)
+      
+            $skateparkCreateResult = wp_insert_post(
+                [
+                    'post_title' => $title,
+                    'post_status' => 'publish',
+                    'post_type' => 'skatepark'
+                ]
+            );
 
-            return [
-                'success' => true,
-            ];
-        }
+            // Si le post skatepark est créé alors...
+            if (is_int($skateparkCreateResult)) {
+
+                // J'ajoute les meta data
+                update_post_meta($skateparkCreateResult, 'skatepark', $skatepark);
+                update_post_meta($skateparkCreateResult, 'pumptrack', $pumptrack);
+                update_post_meta($skateparkCreateResult, 'streetspot', $streetspot);
+                update_post_meta($skateparkCreateResult, 'street', $street);
+                update_post_meta($skateparkCreateResult, 'zipcode', $zipcode);
+                update_post_meta($skateparkCreateResult, 'city', $city);
+                update_post_meta($skateparkCreateResult, 'parking', $parking);
+                update_post_meta($skateparkCreateResult, 'water', $water);
+                update_post_meta($skateparkCreateResult, 'trashcan', $trashcan);
+                update_post_meta($skateparkCreateResult, 'lighting', $lighting);
+                update_post_meta($skateparkCreateResult, 'table', $table);
+                update_post_meta($skateparkCreateResult, 'benche', $benche);
+                update_post_meta($skateparkCreateResult, 'state', $state);        
+
+                // Je récupère la base64 et le type de l'image
+                list($type, $data) = explode(';', $image);
+                list(, $data)      = explode(',', $data);
+                list(, $type) = explode('/', $type);
+
+            
+                // Si l'image a le bont type alors...
+                if (!in_array($type, ['jpg', 'jpeg','png'])) {
+                    echo "nop!";
+                } else {
+                    echo "yes!";
+                    $dataDecoded = base64_decode($data);
+                    //$datajson = $dataDecoded;
+
+                }
+            
+                // nom de mon image
+                $name = "{$title}-{uniqid}.{$type}";
+                // nom de mon image (sans l'extension)
+                $filename = basename( $name );
+                // je demande à WP les chemins de téléchargement 
+                $upload_dir = wp_upload_dir();
+
+                // si il n'existe pas, WP va me créer un dossier (ici uploads/2021/)
+                if ( wp_mkdir_p( $upload_dir['path'] ) ) {
+                    $file = $upload_dir['path'] . '/' . $filename;
+                }
+                else {
+                    $file = $upload_dir['basedir'] . '/' . $filename;
+                }
+                
+                // Je reconstruit mon image
+                file_put_contents( $file, $dataDecoded );
+
+                $attachment = array(
+                //'guid'=> $upload_dir['url'] . '/' . basename($name),
+                'post_mime_type' => "image/{$type}",
+                'post_title' => 'test',
+                'post_content' => '',
+                'post_status' => 'inherit'
+                );
+
+                $image_id = wp_insert_attachment($attachment, $file, $skateparkCreateResult);
+
+                // Make sure that this file is included, as wp_generate_attachment_metadata() depends on it.
+                require_once(ABSPATH . 'wp-admin/includes/image.php');
+                // Generate the metadata for the attachment, and update the database record.
+                $attach_data = wp_generate_attachment_metadata($image_id, $file);
+                wp_update_attachment_metadata($image_id, $attach_data);
+
+                return [
+                    'succes' => true,
+                    //'data' => $datajson
+                 ];
+            }
 
         return [
-            'success' => false,
+            'succes' => false,
         ];
     }
 
