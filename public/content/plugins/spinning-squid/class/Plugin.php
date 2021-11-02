@@ -82,5 +82,47 @@ class Plugin
             ]
         );
     }
-    
+
+    // Méthode ajoutant une CT : type de skatepark
+    public function createSkateparkTypeCustomTaxonomy()
+    {
+        register_taxonomy('skatepark-type',
+            ['skatepark'], // seul les recettes pourront avoir un/des ingredients
+            [
+                'label' => 'Type de skatepark',
+                'hierarchical' => true,
+                'public' => true,
+                'show_in_rest' => true
+            ]
+        );
+    }
+
+    // Méthode ajoutant une CT : différents élements du skatepark
+    public function createSkateparkElementsCustomTaxonomy()
+    {
+        register_taxonomy('skatepark-elements',
+            ['skatepark'], // seul les recettes pourront avoir un/des ingredients
+            [
+                'label' => 'Elements du skatepark',
+                'hierarchical' => true,
+                'public' => true,
+                'show_in_rest' => true
+            ]
+        );
+    }
+
+    // Méthode ajoutant une CT : état du skatepark
+    public function createSkateparkStateCustomTaxonomy()
+    {
+        register_taxonomy('skatepark-state',
+            ['skatepark'], // seul les recettes pourront avoir un/des ingredients
+            [
+                'label' => 'Etat du skatepark',
+                'hierarchical' => true,
+                'public' => true,
+                'show_in_rest' => true
+            ]
+        );
+    }
+
 }
