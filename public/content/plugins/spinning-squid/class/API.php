@@ -366,9 +366,6 @@ class API
         wp_delete_post($id);
     }
 
-}
-
-
     // Save email in table custom newsletter
     public function newsLetter(WP_REST_Request $request)
     {
@@ -385,4 +382,3 @@ class API
         }
     }
 }
-
