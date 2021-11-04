@@ -53,13 +53,120 @@ class Plugin
                     'editor',
                     'author',
                     'excerpt',
-                    'comments'    
+                    'comments',
+                    'custom-fields'   
                 ],
                 'capability_type' => 'post',
                 'map_meta_cap' => true,
                 'show_in_rest' => true
             ]
         );
+
+        register_meta('post', 'skatepark', [
+            'object_subtype' => 'skatepark', 
+            'type'           => 'boolean',
+            'description'    => 'spot type',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
+        register_meta('post', 'pumptrack', [
+            'object_subtype' => 'skatepark', 
+            'type'           => 'boolean',
+            'description'    => 'spot type',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
+        register_meta('post', 'streetspot', [
+            'object_subtype' => 'skatepark', 
+            'type'           => 'boolean',
+            'description'    => 'spot type',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
+        register_meta('post', 'street', [
+            'object_subtype' => 'skatepark', 
+            'type'           => 'string',
+            'description'    => 'skatepark street',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
+        register_meta('post', 'zipcode', [
+            'object_subtype' => 'skatepark', 
+            'type'           => 'string',
+            'description'    => 'skatepark zipcode',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
+        register_meta('post', 'city', [
+            'object_subtype' => 'skatepark', 
+            'type'           => 'string',
+            'description'    => 'skatepark city',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
+        register_meta('post', 'latitude', [
+            'object_subtype' => 'skatepark', 
+            'type'           => 'integer',
+            'description'    => 'skatepark latitude',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
+        register_meta('post', 'longitude', [
+            'object_subtype' => 'skatepark', 
+            'type'           => 'integer',
+            'description'    => 'skatepark longitude',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
+        register_meta('post', 'parking', [
+            'object_subtype' => 'skatepark', 
+            'type'           => 'boolean',
+            'description'    => 'skatepark equipement',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
+        register_meta('post', 'water', [
+            'object_subtype' => 'skatepark', 
+            'type'           => 'boolean',
+            'description'    => 'skatepark equipement',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
+        register_meta('post', 'trashcan', [
+            'object_subtype' => 'skatepark', 
+            'type'           => 'boolean',
+            'description'    => 'skatepark equipement',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
+        register_meta('post', 'lighting', [
+            'object_subtype' => 'skatepark', 
+            'type'           => 'boolean',
+            'description'    => 'skatepark equipement',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
+        register_meta('post', 'table', [
+            'object_subtype' => 'skatepark', 
+            'type'           => 'boolean',
+            'description'    => 'skatepark equipement',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
+        register_meta('post', 'benche', [
+            'object_subtype' => 'skatepark', 
+            'type'           => 'boolean',
+            'description'    => 'skatepark equipement',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
+        register_meta('post', 'state', [
+            'object_subtype' => 'skatepark', 
+            'type'           => 'string',
+            'description'    => 'skatepark city',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
     }
 
     //Méthode créant un CPT : Sale 
