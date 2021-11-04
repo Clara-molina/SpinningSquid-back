@@ -56,6 +56,15 @@ class API
 
         register_rest_route(
             'spinningsquid/v1',
+            '/update-sale',
+            [
+                'methods' => 'post',
+                'callback' => [$this, 'updateSale']
+            ]
+        );
+
+        register_rest_route(
+            'spinningsquid/v1',
             '/delete-sale',
             [
                 'methods' => 'post',
@@ -455,7 +464,7 @@ class API
                 $attachment = array(
                 //'guid'=> $upload_dir['url'] . '/' . basename($name),
                 'post_mime_type' => "image/{$type}",
-                'post_title' => 'test',
+                'post_title' => basename($name),
                 'post_content' => '',
                 'post_status' => 'inherit'
                 );
@@ -469,15 +478,94 @@ class API
                 wp_update_attachment_metadata($image_id, $attach_data);
 
                 return [
-                    'succes' => true,
+                    'success' => true,
                     //'data' => $datajson
                     ];
             }
 
         return [
-            'succes' => false,
+            'success' => false,
         ];
 
+    }
+
+    // update sale
+    public function updateSale(WP_REST_Request $request)
+    {
+        $title = $request->get_param('title');
+        $description = $request->get_param('content');
+        $image = $request->get_param('image');
+
+        $addSaleResult = wp_update_post(
+            [
+                'post_title' => $title,
+                'post_content' => $description,
+                'post_status' => 'publish',
+                'post_type' => 'sale'
+            ]
+        );
+
+        if($addSaleResult)
+        {
+                // Je récupère la base64 et le type de l'image
+                list($type, $data) = explode(';', $image);
+                list(, $data)      = explode(',', $data);
+                list(, $type) = explode('/', $type);
+
+            
+                // Si l'image a le bont type alors...
+                if (!in_array($type, ['jpg', 'jpeg','png'])) {
+                    echo "nop!";
+                } else {
+                    echo "yes!";
+                    $dataDecoded = base64_decode($data);
+                    //$datajson = $dataDecoded;
+
+                }
+            
+                // nom de mon image
+                $name = $title . '-' . uniqid() . $type;
+                // nom de mon image (sans l'extension)
+                $filename = basename( $name );
+                // je demande à WP les chemins de téléchargement 
+                $upload_dir = wp_upload_dir();
+
+                // si il n'existe pas, WP va me créer un dossier (ici uploads/2021/)
+                if ( wp_mkdir_p( $upload_dir['path'] ) ) {
+                    $file = $upload_dir['path'] . '/' . $filename;
+                }
+                else {
+                    $file = $upload_dir['basedir'] . '/' . $filename;
+                }
+                
+                // Je reconstruit mon image
+                file_put_contents( $file, $dataDecoded );
+
+                $attachment = array(
+                //'guid'=> $upload_dir['url'] . '/' . basename($name),
+                'post_mime_type' => "image/{$type}",
+                'post_title' => basename($name),
+                'post_content' => '',
+                'post_status' => 'inherit'
+                );
+
+                $image_id = wp_insert_attachment($attachment, $file, $addSaleResult);
+
+                // Make sure that this file is included, as wp_generate_attachment_metadata() depends on it.
+                require_once(ABSPATH . 'wp-admin/includes/image.php');
+                // Generate the metadata for the attachment, and update the database record.
+                $attach_data = wp_generate_attachment_metadata($image_id, $file);
+                wp_update_attachment_metadata($image_id, $attach_data);
+
+                return [
+                    'success' => true,
+                    //'data' => $datajson
+                    ];
+            }
+
+        return [
+            'success' => false,
+        ];
     }
 
 
