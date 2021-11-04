@@ -411,7 +411,10 @@ class API
         wp_delete_post($id);
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> f46dbdbe66685b39cca33c951b640874d28f3ae5
     // Save email in table custom newsletter
     public function newsLetter(WP_REST_Request $request)
     {
