@@ -88,7 +88,6 @@ class API
             ]
         );
 
-<<<<<<< HEAD
         register_rest_route(
             'spinningsquid/v1',
             '/add-sale',
@@ -115,8 +114,6 @@ class API
                 'callback' => [$this, 'deleteSale']
             ]
         );
-=======
->>>>>>> Dev
     }
 
     // Sauvegarder un nouvel utilisateur
@@ -545,7 +542,6 @@ class API
         }
     }
 
-<<<<<<< HEAD
     // add sale
     public function addSale(WP_REST_Request $request)
     {
@@ -714,6 +710,4 @@ class API
         wp_delete_post($id);
     }
 
-=======
->>>>>>> Dev
 }
