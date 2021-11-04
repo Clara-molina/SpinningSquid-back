@@ -13,6 +13,7 @@ class Plugin
         add_action('init',[$this,'createSalePostType']);
     }
 
+   
     //Méthode créant un CPT : Post (forum)
     public function createArticlePostType()
     {
