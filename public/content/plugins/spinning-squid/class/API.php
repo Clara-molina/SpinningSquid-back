@@ -377,8 +377,8 @@ class API
             update_post_meta($skateparkCreateResult, 'street', $street);
             update_post_meta($skateparkCreateResult, 'zipcode', $zipcode);
             update_post_meta($skateparkCreateResult, 'city', $city);
-            update_post_meta($skateparkCreateResult, 'city', $latitude);
-            update_post_meta($skateparkCreateResult, 'city', $longitude);
+            update_post_meta($skateparkCreateResult, 'latitude', $latitude);
+            update_post_meta($skateparkCreateResult, 'longitude', $longitude);
             update_post_meta($skateparkCreateResult, 'parking', $parking);
             update_post_meta($skateparkCreateResult, 'water', $water);
             update_post_meta($skateparkCreateResult, 'trashcan', $trashcan);
