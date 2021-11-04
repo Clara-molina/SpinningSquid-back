@@ -72,24 +72,6 @@ class API
 
         register_rest_route(
             'spinningsquid/v1',
-            '/save-comments',
-            [
-                'methods' => 'post',
-                'callback' => [$this, 'deleteSkatepark']
-            ]
-        );
-
-        register_rest_route(
-            'spinningsquid/v1',
-            '/newsletter',
-            [
-                'methods' => 'post',
-                'callback' => [$this, 'newsLetter']
-            ]
-        );
-
-        register_rest_route(
-            'spinningsquid/v1',
             '/add-sale',
             [
                 'methods' => 'post',
@@ -112,6 +94,24 @@ class API
             [
                 'methods' => 'post',
                 'callback' => [$this, 'deleteSale']
+            ]
+        );
+
+        register_rest_route(
+            'spinningsquid/v1',
+            '/save-comments',
+            [
+                'methods' => 'post',
+                'callback' => [$this, 'deleteSkatepark']
+            ]
+        );
+
+        register_rest_route(
+            'spinningsquid/v1',
+            '/newsletter',
+            [
+                'methods' => 'post',
+                'callback' => [$this, 'newsLetter']
             ]
         );
     }
@@ -483,66 +483,7 @@ class API
         wp_delete_post($id);
     }
 
-    // Méthode qui sauvegarde un commentaire et le rattache au post correspondant 
-    public function commentSave(WP_REST_Request $request)
-    {
-        $comment = $request->get_param('comment');
-        $postId = $request->get_param('recipeId');
-        $user = wp_get_current_user();
-
-        if (
-            in_array( 'contributor', (array) $user->roles ) ||
-            in_array( 'administrator', (array) $user->roles )
-        ) {
-
-            $commentSaveResult = wp_insert_comment([
-                'user_id' => $user->ID,
-                'comment_post_ID' => $postId,
-                'comment_content' => $comment,
-            ]
-            );
-
-            if(is_int($commentSaveResult)) {
-                return [
-                    'success' => true,
-                    'recipe-id' => $postId,
-                    'comment' => $comment,
-                    'user' => $user,
-                    'comment-id' => $commentSaveResult
-                ];
-            }
-            else {
-                return [
-                    'success' => false
-                ];
-            }
-
-        }
-        else {
-            return [
-                'success' => false,
-            ];
-        }
-
-    }
-
-    // Save email in table custom newsletter
-    public function newsLetter(WP_REST_Request $request)
-    {
-        $email = $request->get_param('email');
-
-        if ($email) {
-            $newsletterModel =   new NewsLetterCustomerModel();
-            $newsletterModel->insert($email);
-
-            return [
-                'succes' => true,
-                'email' => $email
-            ];
-        }
-    }
-
-    // add sale
+    // Ajouter un post sale
     public function addSale(WP_REST_Request $request)
     {
         $title = $request->get_param('title');
@@ -622,7 +563,7 @@ class API
 
     }
 
-    // update sale
+    // Modifier un post sale
     public function updateSale(WP_REST_Request $request)
     {
         $title = $request->get_param('title');
@@ -701,13 +642,71 @@ class API
         ];
     }
 
-
-    // delete sale
+    // Suppprimer un post sale
     public function deleteSale(WP_REST_Request $request)
     {
         $id = $request->get_param('id');
 
         wp_delete_post($id);
+    }
+
+    // Méthode qui sauvegarde un commentaire et le rattache au post correspondant 
+    public function commentSave(WP_REST_Request $request)
+    {
+        $comment = $request->get_param('comment');
+        $postId = $request->get_param('recipeId');
+        $user = wp_get_current_user();
+
+        if (
+            in_array( 'contributor', (array) $user->roles ) ||
+            in_array( 'administrator', (array) $user->roles )
+        ) {
+
+            $commentSaveResult = wp_insert_comment([
+                'user_id' => $user->ID,
+                'comment_post_ID' => $postId,
+                'comment_content' => $comment,
+            ]
+            );
+
+            if(is_int($commentSaveResult)) {
+                return [
+                    'success' => true,
+                    'recipe-id' => $postId,
+                    'comment' => $comment,
+                    'user' => $user,
+                    'comment-id' => $commentSaveResult
+                ];
+            }
+            else {
+                return [
+                    'success' => false
+                ];
+            }
+
+        }
+        else {
+            return [
+                'success' => false,
+            ];
+        }
+
+    }
+
+    // Save email in table custom newsletter
+    public function newsLetter(WP_REST_Request $request)
+    {
+        $email = $request->get_param('email');
+
+        if ($email) {
+            $newsletterModel =   new NewsLetterCustomerModel();
+            $newsletterModel->insert($email);
+
+            return [
+                'succes' => true,
+                'email' => $email
+            ];
+        }
     }
 
 }
