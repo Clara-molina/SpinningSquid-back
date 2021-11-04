@@ -53,6 +53,15 @@ class API
                 'callback' => [$this, 'addSale']
             ]
         );
+
+        register_rest_route(
+            'spinningsquid/v1',
+            '/delete-sale',
+            [
+                'methods' => 'post',
+                'callback' => [$this, 'deleteSale']
+            ]
+        );
     }
 
     // Sauvegarder un nouvel utilisateur 
@@ -395,13 +404,13 @@ class API
     public function addSale(WP_REST_Request $request)
     {
         $title = $request->get_param('title');
-        $description = $request->get_param('description');
+        $description = $request->get_param('content');
         $image = $request->get_param('image');
 
         $addSaleResult = wp_insert_post(
             [
                 'post_title' => $title,
-                'post_description' => $description,
+                'post_content' => $description,
                 'post_status' => 'publish',
                 'post_type' => 'sale'
             ]
@@ -470,4 +479,14 @@ class API
         ];
 
     }
+
+
+    // delete sale
+    public function deleteSale(WP_REST_Request $request)
+    {
+        $id = $request->get_param('id');
+
+        wp_delete_post($id);
+    }
+
 }
