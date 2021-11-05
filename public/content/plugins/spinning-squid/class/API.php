@@ -72,24 +72,6 @@ class API
 
         register_rest_route(
             'spinningsquid/v1',
-            '/save-comments',
-            [
-                'methods' => 'post',
-                'callback' => [$this, 'deleteSkatepark']
-            ]
-        );
-
-        register_rest_route(
-            'spinningsquid/v1',
-            '/newsletter',
-            [
-                'methods' => 'post',
-                'callback' => [$this, 'newsLetter']
-            ]
-        );
-
-        register_rest_route(
-            'spinningsquid/v1',
             '/add-sale',
             [
                 'methods' => 'post',
@@ -114,6 +96,24 @@ class API
                 'callback' => [$this, 'deleteSale']
             ]
         );
+
+        register_rest_route(
+            'spinningsquid/v1',
+            '/save-comments',
+            [
+                'methods' => 'post',
+                'callback' => [$this, 'deleteSkatepark']
+            ]
+        );
+
+        register_rest_route(
+            'spinningsquid/v1',
+            '/newsletter',
+            [
+                'methods' => 'post',
+                'callback' => [$this, 'newsLetter']
+            ]
+        );
     }
 
     // Sauvegarder un nouvel utilisateur
@@ -128,27 +128,25 @@ class API
         $email = $request->get_param('email');
         $password = $request->get_param('password');
 
-        //$userID = wp_create_user($username, $password, $email);
+        if (username_exists($username)) {
+           return [
+               'succes' => 'this username already exist'
+           ];
+        }
 
-        $userData = [
-            'user_login' => $username,
-            'first_name' => $firstname,
-            'last_name' => $lastname,
-            'user_pass' => $password,
-            'user_email' => $email,
-        ];
-
-
-        $userID = wp_insert_user($userData);
+        $userID = wp_create_user($username, $password, $email);
 
         if (is_int($userID)) {
             $user = new WP_User($userID);
 
             $user->set_role('contributor');
-
+            add_user_meta($userID, 'username', $username);
+            add_user_meta($userID, 'lastname', $lastname);
+            add_user_meta($userID, 'firstname', $firstname);
             add_user_meta($userID, 'street', $street);
             add_user_meta($userID, 'zipcode', $zipcode);
             add_user_meta($userID, 'city', $city);
+            add_user_meta($userID, 'email', $email);
 
             return [
                 'succes' => true,
@@ -168,7 +166,6 @@ class API
     {
         $userID = get_current_user_id();
 
-        $username = $request->get_param('username');
         $lastname = $request->get_param('lastname');
         $firstname = $request->get_param('firstname');
         $street = $request->get_param('street');
@@ -178,18 +175,16 @@ class API
         $password = $request->get_param('password');
 
         $userData = array(
-            'user_login' => $username,
-            'first_name' => $firstname,
-            'last_name' => $lastname,
+            'firstname' => $firstname,
+            'lastname' => $lastname,
             'street ' => $street,
             'zipcode' => $zipcode,
             'city' => $city,
-            'user_email' => $email,
-            'user_pass' => $password,
-            'user_email' => $email,
+            'email' => $email,
         );
 
         update_user_meta($userID, $userData, false);
+        wp_set_password($password, $userID);
 
         // update user's avatar :
         $image = $request->get_param('image');
@@ -209,8 +204,8 @@ class API
             //$datajson = $dataDecoded;
         }
 
-        // nom de mon image
-        $name = $username . '-' . uniqid() . $type;
+        $userImageID = uniqid();
+        $name = $userImageID . $type;
         // nom de mon image (sans l'extension)
         $filename = basename($name);
         // je demande à WP les chemins de téléchargement 
@@ -226,7 +221,7 @@ class API
         // Je reconstruit mon image
         file_put_contents($file, $dataDecoded);
 
-        update_user_meta($userID, 'profilImage', $file);
+        update_user_meta($userID, 'simple_local_avatar', $file);
     }
 
     // Supprimer un utilisateur
@@ -483,66 +478,7 @@ class API
         wp_delete_post($id);
     }
 
-    // Méthode qui sauvegarde un commentaire et le rattache au post correspondant 
-    public function commentSave(WP_REST_Request $request)
-    {
-        $comment = $request->get_param('comment');
-        $postId = $request->get_param('recipeId');
-        $user = wp_get_current_user();
-
-        if (
-            in_array( 'contributor', (array) $user->roles ) ||
-            in_array( 'administrator', (array) $user->roles )
-        ) {
-
-            $commentSaveResult = wp_insert_comment([
-                'user_id' => $user->ID,
-                'comment_post_ID' => $postId,
-                'comment_content' => $comment,
-            ]
-            );
-
-            if(is_int($commentSaveResult)) {
-                return [
-                    'success' => true,
-                    'recipe-id' => $postId,
-                    'comment' => $comment,
-                    'user' => $user,
-                    'comment-id' => $commentSaveResult
-                ];
-            }
-            else {
-                return [
-                    'success' => false
-                ];
-            }
-
-        }
-        else {
-            return [
-                'success' => false,
-            ];
-        }
-
-    }
-
-    // Save email in table custom newsletter
-    public function newsLetter(WP_REST_Request $request)
-    {
-        $email = $request->get_param('email');
-
-        if ($email) {
-            $newsletterModel =   new NewsLetterCustomerModel();
-            $newsletterModel->insert($email);
-
-            return [
-                'succes' => true,
-                'email' => $email
-            ];
-        }
-    }
-
-    // add sale
+    // Ajouter un post sale
     public function addSale(WP_REST_Request $request)
     {
         $title = $request->get_param('title');
@@ -622,7 +558,7 @@ class API
 
     }
 
-    // update sale
+    // Modifier un post sale
     public function updateSale(WP_REST_Request $request)
     {
         $title = $request->get_param('title');
@@ -701,13 +637,71 @@ class API
         ];
     }
 
-
-    // delete sale
+    // Suppprimer un post sale
     public function deleteSale(WP_REST_Request $request)
     {
         $id = $request->get_param('id');
 
         wp_delete_post($id);
+    }
+
+    // Méthode qui sauvegarde un commentaire et le rattache au post correspondant 
+    public function commentSave(WP_REST_Request $request)
+    {
+        $comment = $request->get_param('comment');
+        $postId = $request->get_param('recipeId');
+        $user = wp_get_current_user();
+
+        if (
+            in_array( 'contributor', (array) $user->roles ) ||
+            in_array( 'administrator', (array) $user->roles )
+        ) {
+
+            $commentSaveResult = wp_insert_comment([
+                'user_id' => $user->ID,
+                'comment_post_ID' => $postId,
+                'comment_content' => $comment,
+            ]
+            );
+
+            if(is_int($commentSaveResult)) {
+                return [
+                    'success' => true,
+                    'recipe-id' => $postId,
+                    'comment' => $comment,
+                    'user' => $user,
+                    'comment-id' => $commentSaveResult
+                ];
+            }
+            else {
+                return [
+                    'success' => false
+                ];
+            }
+
+        }
+        else {
+            return [
+                'success' => false,
+            ];
+        }
+
+    }
+
+    // Save email in table custom newsletter
+    public function newsLetter(WP_REST_Request $request)
+    {
+        $email = $request->get_param('email');
+
+        if ($email) {
+            $newsletterModel =   new NewsLetterCustomerModel();
+            $newsletterModel->insert($email);
+
+            return [
+                'succes' => true,
+                'email' => $email
+            ];
+        }
     }
 
 }
