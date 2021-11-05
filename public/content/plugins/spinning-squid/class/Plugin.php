@@ -193,18 +193,66 @@ class Plugin
         );
     }
 
-    public function activate()
-    {
-        // création de la table NewsLetter_customer
-        $projectCustomerModel = new NewsLetterCustomerModel();
-        $projectCustomerModel->createTable();
+    public function addCapAdmin()
+    {   //add capabilities for CPT skatepark
+        $role = get_role('administrator');
+        $role->add_cap('delete_others_skatepark');
+        $role->add_cap('delete_private_skatepark');
+        $role->add_cap('delete_published_skatepark');
+        $role->add_cap('delete_skatepark');
+        $role->add_cap('edit_others_skatepark');
+        $role->add_cap('edit_private_skatepark');
+        $role->add_cap('edit_published_skatepark');
+        $role->add_cap('edit_skatepark');
+        $role->add_cap('publish_skatepark');
+        $role->add_cap('read_private_skatepark');
+
+        //add capabilities for CPT sale
+        $role->add_cap('delete_others_sale');
+        $role->add_cap('delete_private_sale');
+        $role->add_cap('delete_published_sale');
+        $role->add_cap('delete_sale');
+        $role->add_cap('edit_others_sale');
+        $role->add_cap('edit_private_sale');
+        $role->add_cap('edit_published_sale');
+        $role->add_cap('edit_sale');
+        $role->add_cap('publish_sale');
+        $role->add_cap('read_private_sale');
+
+        //add capabilities for CPT article
+        $role->add_cap('delete_others_article');
+        $role->add_cap('delete_private_article');
+        $role->add_cap('delete_published_article');
+        $role->add_cap('delete_article');
+        $role->add_cap('edit_others_article');
+        $role->add_cap('edit_private_article');
+        $role->add_cap('edit_published_article');
+        $role->add_cap('edit_article');
+        $role->add_cap('publish_article');
+        $role->add_cap('read_private_article');
     }
 
+    public function addCapContributor()
+    {   // add capabilities for Contributor
+        $role = get_role('contributor');
+        $role->add_cap('create_posts');
+        $role->add_cap('publish_posts');
+    }
+
+    // Add function at plugin activation
+    public function activate()
+    {
+        // Make custom table newsletter
+        $projectCustomerModel = new NewsLetterCustomerModel();
+        $projectCustomerModel->createTable();
+        // Add capabilities
+        $this->addCapAdmin();
+        $this->addCapContributor();
+    }
+    // Add function at plugin deactivation
     public function deactivate()
     {
-        // suppression de la table NewsLetter_customer
-        //$projectCustomerModel = new NewsLetterCustomerModel();
-        //$projectCustomerModel->dropTable();
+
     }
     
 }
