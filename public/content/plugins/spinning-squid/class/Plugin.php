@@ -11,6 +11,8 @@ class Plugin
         add_action('init',[$this,'createArticlePostType']);
         add_action('init',[$this,'createSkateparkPostType']);
         add_action('init',[$this,'createSalePostType']);
+        add_action('init',[$this,'createUserCustomData']);
+        add_filter('rest_user_query',[$this, 'showAllUsers']);
     }
 
    
@@ -191,6 +193,49 @@ class Plugin
                 'show_in_rest' => true
             ]
         );
+    }
+
+    /**
+     * Méthode permettant d'acceder à tous les user via l'appel à l'API 
+     * 
+     * Removes `has_published_posts` from the query args so even users who have not
+     * published content are returned by the request.
+     *
+     * @see https://developer.wordpress.org/reference/classes/wp_user_query/
+     *
+     * @param array           $prepared_args Array of arguments for WP_User_Query.
+     * @param WP_REST_Request $request       The current request.
+     *
+     * @return array
+     */
+    public function showAllUsers($prepared_args)
+    {
+        unset($prepared_args['has_published_posts']);
+
+        return $prepared_args;
+    }
+
+    // Méthode permettant d'acceder au meta data d'un user via l'appel à l'API
+    public function createUserCustomData()
+    {
+        register_meta('user', 'street', [
+            'type'           => 'string',
+            'description'    => 'user street',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
+        register_meta('user', 'zipcode', [
+            'type'           => 'string',
+            'description'    => 'user zipcode',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
+        register_meta('user', 'city', [
+            'type'           => 'string',
+            'description'    => 'user city',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
     }
 
     public function activate()
