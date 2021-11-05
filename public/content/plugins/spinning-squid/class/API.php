@@ -129,9 +129,9 @@ class API
         $password = $request->get_param('password');
 
         if (username_exists($username)) {
-           return [
-               'succes' => 'this username already exist'
-           ];
+            return [
+                'succes' => 'this username already exist'
+            ];
         }
 
         $userID = wp_create_user($username, $password, $email);
@@ -164,8 +164,7 @@ class API
     // Modifier un utilisateur existant
     public function updateUser(WP_REST_Request $request)
     {
-        $userID = get_current_user_id();
-
+        $username = $request->get_param('username');
         $lastname = $request->get_param('lastname');
         $firstname = $request->get_param('firstname');
         $street = $request->get_param('street');
@@ -174,7 +173,10 @@ class API
         $email = $request->get_param('email');
         $password = $request->get_param('password');
 
-        $userData = array(
+        $user = get_user_by('slug', $username);
+        $userID = $user->ID;
+
+        $userDataKey = array(
             'firstname' => $firstname,
             'lastname' => $lastname,
             'street ' => $street,
@@ -183,17 +185,17 @@ class API
             'email' => $email,
         );
 
-        update_user_meta($userID, $userData, false);
+        foreach ($userDataKey as $key => $value) {
+            update_user_meta($userID, $key, $value);
+        }
         wp_set_password($password, $userID);
 
-        // update user's avatar :
         $image = $request->get_param('image');
 
         // Je récupère la base64 et le type de l'image
         list($type, $data) = explode(';', $image);
         list(, $data)      = explode(',', $data);
         list(, $type) = explode('/', $type);
-
 
         // Si l'image a le bont type alors...
         if (!in_array($type, ['jpg', 'jpeg', 'png'])) {
@@ -202,8 +204,10 @@ class API
             echo "yes!";
             $dataDecoded = base64_decode($data);
             //$datajson = $dataDecoded;
+
         }
 
+        // nom de mon image
         $userImageID = uniqid();
         $name = $userImageID . $type;
         // nom de mon image (sans l'extension)
@@ -221,7 +225,20 @@ class API
         // Je reconstruit mon image
         file_put_contents($file, $dataDecoded);
 
-        update_user_meta($userID, 'simple_local_avatar', $file);
+        $attachment = array(
+            //'guid'=> $upload_dir['url'] . '/' . basename($name),
+            'post_mime_type' => "image/{$type}",
+            'post_status' => 'inherit'
+        );
+
+        $image_id = wp_insert_attachment($attachment, $file);
+
+        // Make sure that this file is included, as wp_generate_attachment_metadata() depends on it.
+        require_once(ABSPATH . 'wp-admin/includes/image.php');
+        // Generate the metadata for the attachment, and update the database record.
+        $attach_data = wp_generate_attachment_metadata($image_id, $file);
+        wp_update_attachment_metadata($image_id, $attach_data);
+        update_user_meta($userID, 'wp_user_avatar', $image_id);
     }
 
     // Supprimer un utilisateur
@@ -494,68 +511,65 @@ class API
             ]
         );
 
-        if($addSaleResult)
-        {
-                // Je récupère la base64 et le type de l'image
-                list($type, $data) = explode(';', $image);
-                list(, $data)      = explode(',', $data);
-                list(, $type) = explode('/', $type);
+        if ($addSaleResult) {
+            // Je récupère la base64 et le type de l'image
+            list($type, $data) = explode(';', $image);
+            list(, $data)      = explode(',', $data);
+            list(, $type) = explode('/', $type);
 
-            
-                // Si l'image a le bont type alors...
-                if (!in_array($type, ['jpg', 'jpeg','png'])) {
-                    echo "nop!";
-                } else {
-                    echo "yes!";
-                    $dataDecoded = base64_decode($data);
-                    //$datajson = $dataDecoded;
 
-                }
-            
-                // nom de mon image
-                $name = $title . '-' . uniqid() . $type;
-                // nom de mon image (sans l'extension)
-                $filename = basename( $name );
-                // je demande à WP les chemins de téléchargement 
-                $upload_dir = wp_upload_dir();
+            // Si l'image a le bont type alors...
+            if (!in_array($type, ['jpg', 'jpeg', 'png'])) {
+                echo "nop!";
+            } else {
+                echo "yes!";
+                $dataDecoded = base64_decode($data);
+                //$datajson = $dataDecoded;
 
-                // si il n'existe pas, WP va me créer un dossier (ici uploads/2021/)
-                if ( wp_mkdir_p( $upload_dir['path'] ) ) {
-                    $file = $upload_dir['path'] . '/' . $filename;
-                }
-                else {
-                    $file = $upload_dir['basedir'] . '/' . $filename;
-                }
-                
-                // Je reconstruit mon image
-                file_put_contents( $file, $dataDecoded );
+            }
 
-                $attachment = array(
+            // nom de mon image
+            $name = $title . '-' . uniqid() . $type;
+            // nom de mon image (sans l'extension)
+            $filename = basename($name);
+            // je demande à WP les chemins de téléchargement 
+            $upload_dir = wp_upload_dir();
+
+            // si il n'existe pas, WP va me créer un dossier (ici uploads/2021/)
+            if (wp_mkdir_p($upload_dir['path'])) {
+                $file = $upload_dir['path'] . '/' . $filename;
+            } else {
+                $file = $upload_dir['basedir'] . '/' . $filename;
+            }
+
+            // Je reconstruit mon image
+            file_put_contents($file, $dataDecoded);
+
+            $attachment = array(
                 //'guid'=> $upload_dir['url'] . '/' . basename($name),
                 'post_mime_type' => "image/{$type}",
                 'post_title' => basename($name),
                 'post_content' => '',
                 'post_status' => 'inherit'
-                );
+            );
 
-                $image_id = wp_insert_attachment($attachment, $file, $addSaleResult);
+            $image_id = wp_insert_attachment($attachment, $file, $addSaleResult);
 
-                // Make sure that this file is included, as wp_generate_attachment_metadata() depends on it.
-                require_once(ABSPATH . 'wp-admin/includes/image.php');
-                // Generate the metadata for the attachment, and update the database record.
-                $attach_data = wp_generate_attachment_metadata($image_id, $file);
-                wp_update_attachment_metadata($image_id, $attach_data);
+            // Make sure that this file is included, as wp_generate_attachment_metadata() depends on it.
+            require_once(ABSPATH . 'wp-admin/includes/image.php');
+            // Generate the metadata for the attachment, and update the database record.
+            $attach_data = wp_generate_attachment_metadata($image_id, $file);
+            wp_update_attachment_metadata($image_id, $attach_data);
 
-                return [
-                    'success' => true,
-                    //'data' => $datajson
-                    ];
-            }
+            return [
+                'success' => true,
+                //'data' => $datajson
+            ];
+        }
 
         return [
             'success' => false,
         ];
-
     }
 
     // Modifier un post sale
@@ -574,63 +588,61 @@ class API
             ]
         );
 
-        if($addSaleResult)
-        {
-                // Je récupère la base64 et le type de l'image
-                list($type, $data) = explode(';', $image);
-                list(, $data)      = explode(',', $data);
-                list(, $type) = explode('/', $type);
+        if ($addSaleResult) {
+            // Je récupère la base64 et le type de l'image
+            list($type, $data) = explode(';', $image);
+            list(, $data)      = explode(',', $data);
+            list(, $type) = explode('/', $type);
 
-            
-                // Si l'image a le bont type alors...
-                if (!in_array($type, ['jpg', 'jpeg','png'])) {
-                    echo "nop!";
-                } else {
-                    echo "yes!";
-                    $dataDecoded = base64_decode($data);
-                    //$datajson = $dataDecoded;
 
-                }
-            
-                // nom de mon image
-                $name = $title . '-' . uniqid() . $type;
-                // nom de mon image (sans l'extension)
-                $filename = basename( $name );
-                // je demande à WP les chemins de téléchargement 
-                $upload_dir = wp_upload_dir();
+            // Si l'image a le bont type alors...
+            if (!in_array($type, ['jpg', 'jpeg', 'png'])) {
+                echo "nop!";
+            } else {
+                echo "yes!";
+                $dataDecoded = base64_decode($data);
+                //$datajson = $dataDecoded;
 
-                // si il n'existe pas, WP va me créer un dossier (ici uploads/2021/)
-                if ( wp_mkdir_p( $upload_dir['path'] ) ) {
-                    $file = $upload_dir['path'] . '/' . $filename;
-                }
-                else {
-                    $file = $upload_dir['basedir'] . '/' . $filename;
-                }
-                
-                // Je reconstruit mon image
-                file_put_contents( $file, $dataDecoded );
+            }
 
-                $attachment = array(
+            // nom de mon image
+            $name = $title . '-' . uniqid() . $type;
+            // nom de mon image (sans l'extension)
+            $filename = basename($name);
+            // je demande à WP les chemins de téléchargement 
+            $upload_dir = wp_upload_dir();
+
+            // si il n'existe pas, WP va me créer un dossier (ici uploads/2021/)
+            if (wp_mkdir_p($upload_dir['path'])) {
+                $file = $upload_dir['path'] . '/' . $filename;
+            } else {
+                $file = $upload_dir['basedir'] . '/' . $filename;
+            }
+
+            // Je reconstruit mon image
+            file_put_contents($file, $dataDecoded);
+
+            $attachment = array(
                 //'guid'=> $upload_dir['url'] . '/' . basename($name),
                 'post_mime_type' => "image/{$type}",
                 'post_title' => basename($name),
                 'post_content' => '',
                 'post_status' => 'inherit'
-                );
+            );
 
-                $image_id = wp_insert_attachment($attachment, $file, $addSaleResult);
+            $image_id = wp_insert_attachment($attachment, $file, $addSaleResult);
 
-                // Make sure that this file is included, as wp_generate_attachment_metadata() depends on it.
-                require_once(ABSPATH . 'wp-admin/includes/image.php');
-                // Generate the metadata for the attachment, and update the database record.
-                $attach_data = wp_generate_attachment_metadata($image_id, $file);
-                wp_update_attachment_metadata($image_id, $attach_data);
+            // Make sure that this file is included, as wp_generate_attachment_metadata() depends on it.
+            require_once(ABSPATH . 'wp-admin/includes/image.php');
+            // Generate the metadata for the attachment, and update the database record.
+            $attach_data = wp_generate_attachment_metadata($image_id, $file);
+            wp_update_attachment_metadata($image_id, $attach_data);
 
-                return [
-                    'success' => true,
-                    //'data' => $datajson
-                    ];
-            }
+            return [
+                'success' => true,
+                //'data' => $datajson
+            ];
+        }
 
         return [
             'success' => false,
@@ -653,18 +665,19 @@ class API
         $user = wp_get_current_user();
 
         if (
-            in_array( 'contributor', (array) $user->roles ) ||
-            in_array( 'administrator', (array) $user->roles )
+            in_array('contributor', (array) $user->roles) ||
+            in_array('administrator', (array) $user->roles)
         ) {
 
-            $commentSaveResult = wp_insert_comment([
-                'user_id' => $user->ID,
-                'comment_post_ID' => $postId,
-                'comment_content' => $comment,
-            ]
+            $commentSaveResult = wp_insert_comment(
+                [
+                    'user_id' => $user->ID,
+                    'comment_post_ID' => $postId,
+                    'comment_content' => $comment,
+                ]
             );
 
-            if(is_int($commentSaveResult)) {
+            if (is_int($commentSaveResult)) {
                 return [
                     'success' => true,
                     'recipe-id' => $postId,
@@ -672,20 +685,16 @@ class API
                     'user' => $user,
                     'comment-id' => $commentSaveResult
                 ];
-            }
-            else {
+            } else {
                 return [
                     'success' => false
                 ];
             }
-
-        }
-        else {
+        } else {
             return [
                 'success' => false,
             ];
         }
-
     }
 
     // Save email in table custom newsletter
@@ -703,5 +712,4 @@ class API
             ];
         }
     }
-
 }
