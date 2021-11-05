@@ -218,6 +218,24 @@ class Plugin
     // Méthode permettant d'acceder au meta data d'un user via l'appel à l'API
     public function createUserCustomData()
     {
+        register_meta('user', 'username', [
+            'type'           => 'string',
+            'description'    => 'user username',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
+        register_meta('user', 'firstname', [
+            'type'           => 'string',
+            'description'    => 'user firstname',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
+        register_meta('user', 'lastname', [
+            'type'           => 'string',
+            'description'    => 'user lastname',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
         register_meta('user', 'street', [
             'type'           => 'string',
             'description'    => 'user street',
@@ -233,6 +251,12 @@ class Plugin
         register_meta('user', 'city', [
             'type'           => 'string',
             'description'    => 'user city',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
+        register_meta('user', 'email', [
+            'type'           => 'string',
+            'description'    => 'user email',
             'single'         => true,
             'show_in_rest'   => true,
         ]);

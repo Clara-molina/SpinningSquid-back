@@ -128,27 +128,25 @@ class API
         $email = $request->get_param('email');
         $password = $request->get_param('password');
 
-        //$userID = wp_create_user($username, $password, $email);
+        if (username_exists($username)) {
+           return [
+               'succes' => 'this username already exist'
+           ];
+        }
 
-        $userData = [
-            'user_login' => $username,
-            'first_name' => $firstname,
-            'last_name' => $lastname,
-            'user_pass' => $password,
-            'user_email' => $email,
-        ];
-
-
-        $userID = wp_insert_user($userData);
+        $userID = wp_create_user($username, $password, $email);
 
         if (is_int($userID)) {
             $user = new WP_User($userID);
 
             $user->set_role('contributor');
-
+            add_user_meta($userID, 'username', $username);
+            add_user_meta($userID, 'lastname', $lastname);
+            add_user_meta($userID, 'firstname', $firstname);
             add_user_meta($userID, 'street', $street);
             add_user_meta($userID, 'zipcode', $zipcode);
             add_user_meta($userID, 'city', $city);
+            add_user_meta($userID, 'email', $email);
 
             return [
                 'succes' => true,
@@ -168,7 +166,6 @@ class API
     {
         $userID = get_current_user_id();
 
-        $username = $request->get_param('username');
         $lastname = $request->get_param('lastname');
         $firstname = $request->get_param('firstname');
         $street = $request->get_param('street');
@@ -178,18 +175,16 @@ class API
         $password = $request->get_param('password');
 
         $userData = array(
-            'user_login' => $username,
-            'first_name' => $firstname,
-            'last_name' => $lastname,
+            'firstname' => $firstname,
+            'lastname' => $lastname,
             'street ' => $street,
             'zipcode' => $zipcode,
             'city' => $city,
-            'user_email' => $email,
-            'user_pass' => $password,
-            'user_email' => $email,
+            'email' => $email,
         );
 
         update_user_meta($userID, $userData, false);
+        wp_set_password($password, $userID);
 
         // update user's avatar :
         $image = $request->get_param('image');
@@ -209,8 +204,8 @@ class API
             //$datajson = $dataDecoded;
         }
 
-        // nom de mon image
-        $name = $username . '-' . uniqid() . $type;
+        $userImageID = uniqid();
+        $name = $userImageID . $type;
         // nom de mon image (sans l'extension)
         $filename = basename($name);
         // je demande à WP les chemins de téléchargement 
@@ -226,7 +221,7 @@ class API
         // Je reconstruit mon image
         file_put_contents($file, $dataDecoded);
 
-        update_user_meta($userID, 'profilImage', $file);
+        update_user_meta($userID, 'simple_local_avatar', $file);
     }
 
     // Supprimer un utilisateur
