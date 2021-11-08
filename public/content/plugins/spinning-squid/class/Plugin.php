@@ -31,7 +31,8 @@ class Plugin
                     'editor',
                     'author',
                     'excerpt',
-                    'comments' //! ATTENTION il faut activer la "feature" COMMENTS coté BO    
+                    'comments',
+                    'custom-fields'   
                 ],
                 'capability_type' => 'post',
                 'map_meta_cap' => true,
@@ -186,7 +187,8 @@ class Plugin
                     'editor',
                     'author',
                     'excerpt',
-                    'comments'    
+                    'comments',
+                    'custom-fields'    
                 ],
                 'capability_type' => 'post',
                 'map_meta_cap' => true,
