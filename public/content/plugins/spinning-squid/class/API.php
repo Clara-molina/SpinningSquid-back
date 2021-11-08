@@ -373,6 +373,7 @@ class API
     // Modifier un skatepark
     public function updateSkatepark(WP_REST_Request $request)
     {
+        $id = $request->get_param('id');
         $title = $request->get_param('title');
         $skatepark = $request->get_param('skatepark');
         $pumptrack = $request->get_param('pumptrack');
@@ -399,6 +400,7 @@ class API
 
         $skateparkCreateResult = wp_insert_post(
             [
+                'ID' => $id,
                 'post_title' => $title,
                 'post_status' => 'publish',
                 'post_type' => 'skatepark'
