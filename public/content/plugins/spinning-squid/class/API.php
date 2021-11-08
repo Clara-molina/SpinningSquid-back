@@ -172,6 +172,7 @@ class API
         $city = $request->get_param('city');
         $email = $request->get_param('email');
         $password = $request->get_param('password');
+        $image = $request->get_param('image');
 
         $user = get_user_by('slug', $username);
         $userID = $user->ID;
@@ -190,8 +191,6 @@ class API
         }
         wp_set_password($password, $userID);
 
-        $image = $request->get_param('image');
-
         // Je récupère la base64 et le type de l'image
         list($type, $data) = explode(';', $image);
         list(, $data)      = explode(',', $data);
@@ -204,7 +203,6 @@ class API
             echo "yes!";
             $dataDecoded = base64_decode($data);
             //$datajson = $dataDecoded;
-
         }
 
         // nom de mon image
@@ -224,10 +222,13 @@ class API
 
         // Je reconstruit mon image
         file_put_contents($file, $dataDecoded);
-
+        
+        
         $attachment = array(
             //'guid'=> $upload_dir['url'] . '/' . basename($name),
             'post_mime_type' => "image/{$type}",
+            'post_author' => $userID,
+            'post_type' => 'attachment',
             'post_status' => 'inherit'
         );
 
@@ -238,7 +239,8 @@ class API
         // Generate the metadata for the attachment, and update the database record.
         $attach_data = wp_generate_attachment_metadata($image_id, $file);
         wp_update_attachment_metadata($image_id, $attach_data);
-        update_user_meta($userID, 'wp_user_avatar', $image_id);
+
+        update_user_meta($userID, 'avatar', $image_id);
     }
 
     // Supprimer un utilisateur

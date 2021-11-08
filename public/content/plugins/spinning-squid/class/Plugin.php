@@ -260,6 +260,12 @@ class Plugin
             'single'         => true,
             'show_in_rest'   => true,
         ]);
+        register_meta('user', 'avatar', [
+            'type'           => 'string',
+            'description'    => 'user avatar',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
     }
 
     public function activate()
