@@ -40,6 +40,21 @@ class Plugin
                 'show_in_rest' => true // Permet d'afficher le CPT dans l'API
             ]
         );
+
+        register_meta('post', 'date', [
+            'object_subtype' => 'article', 
+            'type'           => 'string',
+            'description'    => 'date of event',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
+        register_meta('post', 'place', [
+            'object_subtype' => 'article', 
+            'type'           => 'string',
+            'description'    => 'place of event',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
     }
 
     //Méthode créant un CPT : SkatePark 
@@ -196,6 +211,7 @@ class Plugin
                 'show_in_rest' => true
             ]
         );
+
     }
 
     public function addCapAdmin()

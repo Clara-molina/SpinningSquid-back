@@ -96,13 +96,39 @@ class API
                 'callback' => [$this, 'deleteSale']
             ]
         );
+        register_rest_route(
+            'spinningsquid/v1',
+            '/add-article',
+            [
+                'methods' => 'post',
+                'callback' => [$this, 'addArticle']
+            ]
+        );
+
+        register_rest_route(
+            'spinningsquid/v1',
+            '/update-article',
+            [
+                'methods' => 'post',
+                'callback' => [$this, 'updateArticle']
+            ]
+        );
+
+        register_rest_route(
+            'spinningsquid/v1',
+            '/delete-article',
+            [
+                'methods' => 'post',
+                'callback' => [$this, 'deleteArticle']
+            ]
+        );
 
         register_rest_route(
             'spinningsquid/v1',
             '/save-comments',
             [
                 'methods' => 'post',
-                'callback' => [$this, 'deleteSkatepark']
+                'callback' => [$this, 'commentSave']
             ]
         );
 
@@ -222,8 +248,8 @@ class API
 
         // Je reconstruit mon image
         file_put_contents($file, $dataDecoded);
-        
-        
+
+
         $attachment = array(
             //'guid'=> $upload_dir['url'] . '/' . basename($name),
             'post_mime_type' => "image/{$type}",
@@ -277,10 +303,10 @@ class API
         $user = wp_get_current_user();
 
         // Je vérie que l'user a le bon rôle (donc bien inscrit)
-        if(
+        if (
             in_array('contributor', (array) $user->roles) ||
-            in_array('administrator', (array) $user->roles))
-        {
+            in_array('administrator', (array) $user->roles)
+        ) {
             $skateparkCreateResult = wp_insert_post(
                 [
                     'post_title' => $title,
@@ -404,10 +430,10 @@ class API
 
         $user = wp_get_current_user();
 
-        if(
+        if (
             in_array('contributor', (array) $user->roles) ||
-            in_array('administrator', (array) $user->roles))
-        {
+            in_array('administrator', (array) $user->roles)
+        ) {
             $postItem = get_post($id);
 
             if (!$user->ID == $postItem->post_author) {
@@ -415,7 +441,7 @@ class API
                     'succes' => 'not allowed'
                 ];
             }
-            
+
             $skateparkCreateResult = wp_insert_post(
                 [
                     'ID' => $id,
@@ -513,19 +539,29 @@ class API
     // Suppprimer un skatepark
     public function deleteSkatepark(WP_REST_Request $request)
     {
+        $id = $request->get_param('id');
         $user = wp_get_current_user();
 
-        if(
+        if (
             in_array('contributor', (array) $user->roles) ||
-            in_array('administrator', (array) $user->roles))
-        {
-            $id = $user->ID;
-            wp_delete_post($id);
+            in_array('administrator', (array) $user->roles)
+        ) {
 
-            return [
-                'succes' => true
-            ];
+            $postItem = get_post($id);
 
+            if (!$user->ID == $postItem->post_author) {
+                return [
+                    'succes' => 'not allowed'
+                ];
+            } else {
+
+                wp_delete_post($id);
+
+                return [
+                    'succes' => true
+                ];
+            }
+            
         } else {
 
             return [
@@ -541,15 +577,16 @@ class API
     {
         $title = $request->get_param('title');
         $description = $request->get_param('content');
+        $price = $request->get_param('price');
         $image = $request->get_param('image');
 
         $user = wp_get_current_user();
 
         // Je vérie que l'user a le bon rôle (donc bien inscrit)
-        if(
+        if (
             in_array('contributor', (array) $user->roles) ||
-            in_array('administrator', (array) $user->roles))
-        {
+            in_array('administrator', (array) $user->roles)
+        ) {
             $addSaleResult = wp_insert_post(
                 [
                     'post_title' => $title,
@@ -561,6 +598,9 @@ class API
             );
 
             if ($addSaleResult) {
+
+                update_post_meta($addSaleResult, 'price', $price);
+
                 // Je récupère la base64 et le type de l'image
                 list($type, $data) = explode(';', $image);
                 list(, $data)      = explode(',', $data);
@@ -625,17 +665,27 @@ class API
     // Modifier un post sale
     public function updateSale(WP_REST_Request $request)
     {
+        $id = $request->get_param('id');
         $title = $request->get_param('title');
         $description = $request->get_param('content');
+        $price = $request->get_param('price');
         $image = $request->get_param('image');
 
         $user = wp_get_current_user();
 
         // Je vérie que l'user a le bon rôle (donc bien inscrit)
-        if(
+        if (
             in_array('contributor', (array) $user->roles) ||
-            in_array('administrator', (array) $user->roles))
-        {
+            in_array('administrator', (array) $user->roles)
+        ) {
+            $postItem = get_post($id);
+
+            if (!$user->ID == $postItem->post_author) {
+                return [
+                    'succes' => 'not allowed'
+                ];
+            }
+            
             $addSaleResult = wp_update_post(
                 [
                     'post_title' => $title,
@@ -646,6 +696,9 @@ class API
             );
 
             if ($addSaleResult) {
+
+                update_post_meta($addSaleResult, 'price', $price);
+
                 // Je récupère la base64 et le type de l'image
                 list($type, $data) = explode(';', $image);
                 list(, $data)      = explode(',', $data);
@@ -711,19 +764,258 @@ class API
     public function deleteSale(WP_REST_Request $request)
     {
 
+        $id = $request->get_param('id');
+        $user = wp_get_current_user();
+
+        if (
+            in_array('contributor', (array) $user->roles) ||
+            in_array('administrator', (array) $user->roles)
+        ) {
+
+            $postItem = get_post($id);
+
+            if (!$user->ID == $postItem->post_author) {
+                return [
+                    'succes' => 'not allowed'
+                ];
+            } else {
+
+                wp_delete_post($id);
+
+                return [
+                    'succes' => true
+                ];
+            }
+            
+        } else {
+
+            return [
+                'succes' => false,
+                'informations' => 'user is not connected',
+                'user' => $user->ID
+            ];
+        }
+    }
+
+    // Ajouter un post article (forum)
+    public function addArticle(WP_REST_Request $request)
+    {
+        $title = $request->get_param('title');
+        $description = $request->get_param('story');
+        $date = $request->get_param('date');
+        $place = $request->get_param('place');
+        $image = $request->get_param('image');
+
         $user = wp_get_current_user();
 
         // Je vérie que l'user a le bon rôle (donc bien inscrit)
-        if(
+        if (
             in_array('contributor', (array) $user->roles) ||
-            in_array('administrator', (array) $user->roles))
-        {
-            $id = $request->get_param('id');
-            wp_delete_post($id);
+            in_array('administrator', (array) $user->roles)
+        ) {
+            $addArticleResult = wp_insert_post(
+                [
+                    'post_title' => $title,
+                    'post_author' => $user->ID,
+                    'post_content' => $description,
+                    'post_status' => 'publish',
+                    'post_type' => 'article'
+                ]
+            );
 
-            return [
-                'succes' => true
-            ];
+            if ($addArticleResult) {
+
+                update_post_meta($addArticleResult, 'date', $date);
+                update_post_meta($addArticleResult, 'place', $place);
+
+                // Je récupère la base64 et le type de l'image
+                list($type, $data) = explode(';', $image);
+                list(, $data)      = explode(',', $data);
+                list(, $type) = explode('/', $type);
+
+                // Si l'image a le bont type alors...
+                if (!in_array($type, ['jpg', 'jpeg', 'png'])) {
+                    echo "nop!";
+                } else {
+                    echo "yes!";
+                    $dataDecoded = base64_decode($data);
+                    //$datajson = $dataDecoded;
+                }
+
+                // nom de mon image
+                $userImageID = uniqid();
+                $name = $userImageID . $type;
+                // nom de mon image (sans l'extension)
+                $filename = basename($name);
+                // je demande à WP les chemins de téléchargement
+                $upload_dir = wp_upload_dir();
+
+                // si il n'existe pas, WP va me créer un dossier (ici uploads/2021/)
+                if (wp_mkdir_p($upload_dir['path'])) {
+                    $file = $upload_dir['path'] . '/' . $filename;
+                } else {
+                    $file = $upload_dir['basedir'] . '/' . $filename;
+                }
+
+                // Je reconstruit mon image
+                file_put_contents($file, $dataDecoded);
+
+                $attachment = array(
+                    //'guid'=> $upload_dir['url'] . '/' . basename($name),
+                    'post_mime_type' => "image/{$type}",
+                    'post_title' => basename($name),
+                    'post_content' => '',
+                    'post_status' => 'inherit'
+                );
+
+                $image_id = wp_insert_attachment($attachment, $file, $addArticleResult);
+
+                // Make sure that this file is included, as wp_generate_attachment_metadata() depends on it.
+                require_once(ABSPATH . 'wp-admin/includes/image.php');
+                // Generate the metadata for the attachment, and update the database record.
+                $attach_data = wp_generate_attachment_metadata($image_id, $file);
+                wp_update_attachment_metadata($image_id, $attach_data);
+
+                return [
+                    'success' => true,
+                    //'data' => $datajson
+                ];
+            }
+        }
+        return [
+            'succes' => false,
+            'informations' => 'user is not connected',
+            'user' => $user->ID
+        ];
+    }
+
+    // Modifier un post article (forum)
+    public function updateArticle(WP_REST_Request $request)
+    {
+        $id = $request->get_param('id');
+        $title = $request->get_param('title');
+        $description = $request->get_param('story');
+        $date = $request->get_param('date');
+        $place = $request->get_param('place');
+        $image = $request->get_param('image');
+
+        $user = wp_get_current_user();
+
+        // Je vérie que l'user a le bon rôle (donc bien inscrit)
+        if (
+            in_array('contributor', (array) $user->roles) ||
+            in_array('administrator', (array) $user->roles)
+        ) {
+            $postItem = get_post($id);
+
+            if (!$user->ID == $postItem->post_author) {
+                return [
+                    'succes' => 'not allowed'
+                ];
+            }
+            $addArticleResult = wp_insert_post(
+                [
+                    'post_title' => $title,
+                    'post_author' => $user->ID,
+                    'post_content' => $description,
+                    'post_status' => 'publish',
+                    'post_type' => 'article'
+                ]
+            );
+
+            if ($addArticleResult) {
+
+                update_post_meta($addArticleResult, 'date', $date);
+                update_post_meta($addArticleResult, 'place', $place);
+
+                // Je récupère la base64 et le type de l'image
+                list($type, $data) = explode(';', $image);
+                list(, $data)      = explode(',', $data);
+                list(, $type) = explode('/', $type);
+
+
+                // Si l'image a le bont type alors...
+                if (!in_array($type, ['jpg', 'jpeg', 'png'])) {
+                    echo "nop!";
+                } else {
+                    echo "yes!";
+                    $dataDecoded = base64_decode($data);
+                    //$datajson = $dataDecoded;
+                }
+
+                // nom de mon image
+                $userImageID = uniqid();
+                $name = $userImageID . $type;
+                // nom de mon image (sans l'extension)
+                $filename = basename($name);
+                // je demande à WP les chemins de téléchargement
+                $upload_dir = wp_upload_dir();
+
+                // si il n'existe pas, WP va me créer un dossier (ici uploads/2021/)
+                if (wp_mkdir_p($upload_dir['path'])) {
+                    $file = $upload_dir['path'] . '/' . $filename;
+                } else {
+                    $file = $upload_dir['basedir'] . '/' . $filename;
+                }
+
+                // Je reconstruit mon image
+                file_put_contents($file, $dataDecoded);
+
+                $attachment = array(
+                    //'guid'=> $upload_dir['url'] . '/' . basename($name),
+                    'post_mime_type' => "image/{$type}",
+                    'post_title' => basename($name),
+                    'post_content' => '',
+                    'post_status' => 'inherit'
+                );
+
+                $image_id = wp_insert_attachment($attachment, $file, $addArticleResult);
+
+                // Make sure that this file is included, as wp_generate_attachment_metadata() depends on it.
+                require_once(ABSPATH . 'wp-admin/includes/image.php');
+                // Generate the metadata for the attachment, and update the database record.
+                $attach_data = wp_generate_attachment_metadata($image_id, $file);
+                wp_update_attachment_metadata($image_id, $attach_data);
+
+                return [
+                    'success' => true,
+                    //'data' => $datajson
+                ];
+            }
+        }
+        return [
+            'succes' => false,
+            'informations' => 'user is not connected',
+            'user' => $user->ID
+        ];
+    }
+
+    // Suppprimer un post article (forum)
+    public function deleteArticle(WP_REST_Request $request)
+    {
+        $id = $request->get_param('id');
+        $user = wp_get_current_user();
+
+        if (
+            in_array('contributor', (array) $user->roles) ||
+            in_array('administrator', (array) $user->roles)
+        ) {
+
+            $postItem = get_post($id);
+
+            if (!$user->ID == $postItem->post_author) {
+                return [
+                    'succes' => 'not allowed'
+                ];
+            } else {
+
+                wp_delete_post($id);
+
+                return [
+                    'succes' => true
+                ];
+            }
+            
         } else {
 
             return [
@@ -768,7 +1060,7 @@ class API
                 ];
             }
         } else {
-            
+
             return [
                 'succes' => false,
                 'informations' => 'user is not connected',
