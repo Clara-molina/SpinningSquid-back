@@ -13,6 +13,7 @@ class Plugin
         add_action('init',[$this,'createSalePostType']);
         add_action('init',[$this,'createUserCustomData']);
         add_filter('rest_user_query',[$this, 'showAllUsers']);
+        add_filter( 'rest_skatepark_query', [$this, 'post_meta_request_params'], 99, 2);
     }
 
    
@@ -315,6 +316,19 @@ class Plugin
             'single'         => true,
             'show_in_rest'   => true,
         ]);
+    }
+
+    // Méthode permettant de faire des appels à l'API en prenant des meta data en paramètre
+    // https://maheshwaghmare.com/search-post-by-post-meta-with-rest-api/
+    public function post_meta_request_params( $args, $request )
+    {
+        $args += [
+			'meta_key'   => $request['meta_key'],
+			'meta_value' => $request['meta_value'],
+			'meta_query' => $request['meta_query'],
+        ];
+
+	    return $args;
     }
 
     public function activate()
