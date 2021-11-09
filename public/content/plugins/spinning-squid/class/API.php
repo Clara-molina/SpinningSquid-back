@@ -408,9 +408,14 @@ class API
             in_array('contributor', (array) $user->roles) ||
             in_array('administrator', (array) $user->roles))
         {
+            $postItem = get_post($id);
 
-        // Je vérie que l'user a le bon rôle (donc bien inscrit)
-
+            if (!$user->ID == $postItem->post_author) {
+                return [
+                    'succes' => 'not allowed'
+                ];
+            }
+            
             $skateparkCreateResult = wp_insert_post(
                 [
                     'ID' => $id,
