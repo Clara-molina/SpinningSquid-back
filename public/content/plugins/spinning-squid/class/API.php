@@ -476,7 +476,6 @@ class API
                 list(, $data)      = explode(',', $data);
                 list(, $type) = explode('/', $type);
 
-
                 // Si l'image a le bont type alors...
                 if (!in_array($type, ['jpg', 'jpeg', 'png'])) {
                     echo "nop!";
