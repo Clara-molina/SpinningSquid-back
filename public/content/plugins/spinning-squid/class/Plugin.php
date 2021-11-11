@@ -211,7 +211,13 @@ class Plugin
                 'show_in_rest' => true
             ]
         );
-
+        register_meta('post', 'price', [
+            'object_subtype' => 'sale', 
+            'type'           => 'integer',
+            'description'    => 'price of article',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
     }
 
     public function addCapAdmin()

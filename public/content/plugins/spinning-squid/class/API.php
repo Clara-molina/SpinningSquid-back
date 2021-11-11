@@ -390,8 +390,6 @@ class API
                 return [
                     'succes' => true,
                     'title' => $title,
-                    'parking' => $parking,
-                    'image' => $image
                     //'data' => $datajson
                 ];
             }
@@ -446,6 +444,7 @@ class API
                 [
                     'ID' => $id,
                     'post_title' => $title,
+                    'post_author' => $user->ID,
                     'post_status' => 'publish',
                     'post_type' => 'skatepark'
                 ]
@@ -596,7 +595,7 @@ class API
                 ]
             );
 
-            if ($addSaleResult) {
+            if (is_int($addSaleResult)) {
 
                 update_post_meta($addSaleResult, 'price', $price);
 
@@ -616,7 +615,8 @@ class API
                 }
 
                 // nom de mon image
-                $name = $title . '-' . uniqid() . $type;
+                $userImageID = uniqid();
+                $name = $userImageID . $type;
                 // nom de mon image (sans l'extension)
                 $filename = basename($name);
                 // je demande à WP les chemins de téléchargement
@@ -635,7 +635,7 @@ class API
                 $attachment = array(
                     //'guid'=> $upload_dir['url'] . '/' . basename($name),
                     'post_mime_type' => "image/{$type}",
-                    'post_title' => basename($name),
+                    'post_title' => $title,
                     'post_content' => '',
                     'post_status' => 'inherit'
                 );
@@ -648,8 +648,13 @@ class API
                 $attach_data = wp_generate_attachment_metadata($image_id, $file);
                 wp_update_attachment_metadata($image_id, $attach_data);
 
+                // Ajout de l'image d'en-tête
+                set_post_thumbnail($addSaleResult, $image_id);
+
+
                 return [
                     'success' => true,
+                    'title' => $title,
                     //'data' => $datajson
                 ];
             }
@@ -687,14 +692,16 @@ class API
             
             $addSaleResult = wp_update_post(
                 [
+                    'ID' => $id,
                     'post_title' => $title,
+                    'post_author' => $user->ID,
                     'post_content' => $description,
                     'post_status' => 'publish',
                     'post_type' => 'sale'
                 ]
             );
 
-            if ($addSaleResult) {
+            if (is_int($addSaleResult)) {
 
                 update_post_meta($addSaleResult, 'price', $price);
 
@@ -714,7 +721,8 @@ class API
                 }
 
                 // nom de mon image
-                $name = $title . '-' . uniqid() . $type;
+                $userImageID = uniqid();
+                $name = $userImageID . $type;
                 // nom de mon image (sans l'extension)
                 $filename = basename($name);
                 // je demande à WP les chemins de téléchargement
@@ -733,7 +741,7 @@ class API
                 $attachment = array(
                     //'guid'=> $upload_dir['url'] . '/' . basename($name),
                     'post_mime_type' => "image/{$type}",
-                    'post_title' => basename($name),
+                    'post_title' => $title,
                     'post_content' => '',
                     'post_status' => 'inherit'
                 );
@@ -746,8 +754,13 @@ class API
                 $attach_data = wp_generate_attachment_metadata($image_id, $file);
                 wp_update_attachment_metadata($image_id, $attach_data);
 
+                // Ajout de l'image d'en-tête
+                set_post_thumbnail($addSaleResult, $image_id);
+
+
                 return [
                     'success' => true,
+                    'title' => $title,
                     //'data' => $datajson
                 ];
             }
@@ -822,7 +835,7 @@ class API
                 ]
             );
 
-            if ($addArticleResult) {
+            if (is_int($addArticleResult)) {
 
                 update_post_meta($addArticleResult, 'date', $date);
                 update_post_meta($addArticleResult, 'place', $place);
@@ -835,6 +848,7 @@ class API
                 // Si l'image a le bont type alors...
                 if (!in_array($type, ['jpg', 'jpeg', 'png'])) {
                     echo "nop!";
+                    echo $data;
                 } else {
                     echo "yes!";
                     $dataDecoded = base64_decode($data);
@@ -862,7 +876,7 @@ class API
                 $attachment = array(
                     //'guid'=> $upload_dir['url'] . '/' . basename($name),
                     'post_mime_type' => "image/{$type}",
-                    'post_title' => basename($name),
+                    'post_title' => $title,
                     'post_content' => '',
                     'post_status' => 'inherit'
                 );
@@ -875,8 +889,12 @@ class API
                 $attach_data = wp_generate_attachment_metadata($image_id, $file);
                 wp_update_attachment_metadata($image_id, $attach_data);
 
+                // Ajout de l'image d'en-tête
+                set_post_thumbnail($addArticleResult, $image_id);
+
                 return [
                     'success' => true,
+                    'title' => $title,
                     //'data' => $datajson
                 ];
             }
@@ -914,6 +932,7 @@ class API
             }
             $addArticleResult = wp_insert_post(
                 [
+                    'ID' => $id,
                     'post_title' => $title,
                     'post_author' => $user->ID,
                     'post_content' => $description,
@@ -922,7 +941,7 @@ class API
                 ]
             );
 
-            if ($addArticleResult) {
+            if (is_int($addArticleResult)) {
 
                 update_post_meta($addArticleResult, 'date', $date);
                 update_post_meta($addArticleResult, 'place', $place);
@@ -932,10 +951,10 @@ class API
                 list(, $data)      = explode(',', $data);
                 list(, $type) = explode('/', $type);
 
-
                 // Si l'image a le bont type alors...
                 if (!in_array($type, ['jpg', 'jpeg', 'png'])) {
                     echo "nop!";
+                    echo $data;
                 } else {
                     echo "yes!";
                     $dataDecoded = base64_decode($data);
@@ -963,7 +982,7 @@ class API
                 $attachment = array(
                     //'guid'=> $upload_dir['url'] . '/' . basename($name),
                     'post_mime_type' => "image/{$type}",
-                    'post_title' => basename($name),
+                    'post_title' => $title,
                     'post_content' => '',
                     'post_status' => 'inherit'
                 );
@@ -976,8 +995,12 @@ class API
                 $attach_data = wp_generate_attachment_metadata($image_id, $file);
                 wp_update_attachment_metadata($image_id, $attach_data);
 
+                // Ajout de l'image d'en-tête
+                set_post_thumbnail($addArticleResult, $image_id);
+
                 return [
                     'success' => true,
+                    'title' => $title,
                     //'data' => $datajson
                 ];
             }
