@@ -125,14 +125,14 @@ class Plugin
         ]);
         register_meta('post', 'latitude', [
             'object_subtype' => 'skatepark', 
-            'type'           => 'integer',
+            'type'           => 'number',
             'description'    => 'skatepark latitude',
             'single'         => true,
             'show_in_rest'   => true,
         ]);
         register_meta('post', 'longitude', [
             'object_subtype' => 'skatepark', 
-            'type'           => 'integer',
+            'type'           => 'number',
             'description'    => 'skatepark longitude',
             'single'         => true,
             'show_in_rest'   => true,
