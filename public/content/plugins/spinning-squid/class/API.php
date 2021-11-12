@@ -574,8 +574,9 @@ class API
     public function addSale(WP_REST_Request $request)
     {
         $title = $request->get_param('title');
-        $description = $request->get_param('content');
+        $place = $request->get_param('place');
         $price = $request->get_param('price');
+        $description = $request->get_param('content');
         $image = $request->get_param('image');
 
         $user = wp_get_current_user();
@@ -597,6 +598,7 @@ class API
 
             if (is_int($addSaleResult)) {
 
+                update_post_meta($addSaleResult, 'place', $place);
                 update_post_meta($addSaleResult, 'price', $price);
 
                 // Je récupère la base64 et le type de l'image
@@ -671,8 +673,9 @@ class API
     {
         $id = $request->get_param('id');
         $title = $request->get_param('title');
-        $description = $request->get_param('content');
+        $place = $request->get_param('place');
         $price = $request->get_param('price');
+        $description = $request->get_param('content');
         $image = $request->get_param('image');
 
         $user = wp_get_current_user();
@@ -703,7 +706,9 @@ class API
 
             if (is_int($addSaleResult)) {
 
+                update_post_meta($addSaleResult, 'place', $place);
                 update_post_meta($addSaleResult, 'price', $price);
+
 
                 // Je récupère la base64 et le type de l'image
                 list($type, $data) = explode(';', $image);

@@ -211,10 +211,17 @@ class Plugin
                 'show_in_rest' => true
             ]
         );
+        register_meta('post', 'place', [
+            'object_subtype' => 'sale', 
+            'type'           => 'string',
+            'description'    => 'place of saler',
+            'single'         => true,
+            'show_in_rest'   => true,
+        ]);
         register_meta('post', 'price', [
             'object_subtype' => 'sale', 
             'type'           => 'integer',
-            'description'    => 'price of article',
+            'description'    => 'price of sale item',
             'single'         => true,
             'show_in_rest'   => true,
         ]);
