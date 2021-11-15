@@ -581,7 +581,7 @@ class API
         $title = $request->get_param('title');
         $place = $request->get_param('place');
         $price = $request->get_param('price');
-        $description = $request->get_param('content');
+        $description = $request->get_param('story');
         $image = $request->get_param('image');
 
         $user = wp_get_current_user();
