@@ -159,6 +159,11 @@ class API
                 'succes' => 'this username already exist'
             ];
         }
+        if (email_exists($email)) {
+            return [
+                'succes' => 'this email is already used'
+            ];
+        }
 
         $userID = wp_create_user($username, $password, $email);
 
