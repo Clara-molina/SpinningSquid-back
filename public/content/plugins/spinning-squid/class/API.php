@@ -140,6 +140,15 @@ class API
                 'callback' => [$this, 'newsLetter']
             ]
         );
+        
+        register_rest_route(
+            'spinningsquid/v1',
+            '/send-email',
+            [
+                'methods' => 'post',
+                'callback' => [$this, 'sendEmailContactForm']
+            ]
+        );
     }
 
     // Sauvegarder un nouvel utilisateur
@@ -278,17 +287,34 @@ class API
     public function deleteUser(WP_REST_Request $request)
     {
         //For wp_delete_user() function
-        require_once(ABSPATH.'wp-admin/includes/user.php' );
+        require_once(ABSPATH . 'wp-admin/includes/user.php');
 
         $id = $request->get_param('id');
 
-        // we could place an id at second param to re-assign posts 
-        wp_delete_user($id);
+        $user = wp_get_current_user();
 
-        return [
-            'value' => 'coucou',
-            'id' => $id
-        ];
+        if (
+            in_array('contributor', (array) $user->roles) ||
+            in_array('administrator', (array) $user->roles)
+        ) {
+            if ($user->ID != $id) {
+                return [
+                    'succes' => 'not allowed'
+                ];
+            }
+
+            // we could place an id at second param to re-assign posts
+            wp_delete_user($id);
+
+            return [
+                'succes' => 'user deleted',
+            ];
+        } else {
+            return [
+                'succes' => 'false',
+                'id' => $id
+            ];
+        }
     }
 
     // Ajouter un skatepark
@@ -575,7 +601,6 @@ class API
                     'author' => $postItem->post_author
                 ];
             }
-            
         } else {
 
             return [
@@ -708,7 +733,7 @@ class API
                     'succes' => 'not allowed'
                 ];
             }
-            
+
             $addSaleResult = wp_update_post(
                 [
                     'ID' => $id,
@@ -819,7 +844,6 @@ class API
                     'succes' => true
                 ];
             }
-            
         } else {
 
             return [
@@ -1058,7 +1082,6 @@ class API
                     'succes' => true
                 ];
             }
-            
         } else {
 
             return [
@@ -1124,6 +1147,30 @@ class API
             return [
                 'succes' => true,
                 'email' => $email
+            ];
+        }
+    }
+
+    // Envoie un mail via le formulaire question? à l'email de l'admin
+    public function sendEmailContactForm(WP_REST_Request $request)
+    {
+        $email = $request->get_param('email');
+        $subject = $request->get_param('subject');
+        $message = $request->get_param('message');
+
+        $to = 'spinning-squid@gmail.com';
+        $headers = 'From: ' . $email;
+
+        $sent =  wp_mail($to, $subject, $message, $headers);
+
+        if($sent) {
+            return [
+                'succes' => true
+            ];
+        }
+        else {
+            return [
+                'succes' => false
             ];
         }
     }
