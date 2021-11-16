@@ -1158,7 +1158,7 @@ class API
         $subject = $request->get_param('subject');
         $message = $request->get_param('message');
 
-        $to = 'spinning-squid@gmail.com';
+        $to = 'contact.spinningsquid@gmail.com';
         $headers = 'From: ' . $email;
 
         $sent =  wp_mail($to, $subject, $message, $headers);
@@ -1170,7 +1170,10 @@ class API
         }
         else {
             return [
-                'succes' => false
+                'succes' => false,
+                'information1' => $sent,
+                'information2' => $subject,
+                'informattion3' => $message
             ];
         }
     }

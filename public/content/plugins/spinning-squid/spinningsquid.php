@@ -18,3 +18,4 @@ $api = new API;
     register_activation_hook(__FILE__, [$spinningsquid, 'activate']);
 // Méthode que l'on "branche" sur la désactivation du plugin
     register_deactivation_hook(__FILE__, [$spinningsquid, 'deactivate']);
+
