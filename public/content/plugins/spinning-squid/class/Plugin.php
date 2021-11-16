@@ -14,6 +14,8 @@ class Plugin
         add_action('init',[$this,'createUserCustomData']);
         add_filter('rest_user_query',[$this, 'showAllUsers']);
         add_filter( 'rest_skatepark_query', [$this, 'post_meta_request_params'], 99, 2);
+        add_filter( 'rest_sale_query', [$this, 'post_meta_request_params'], 99, 2);
+        add_filter( 'rest_article_query', [$this, 'post_meta_request_params'], 99, 2);
     }
 
    

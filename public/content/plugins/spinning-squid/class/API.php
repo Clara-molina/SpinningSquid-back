@@ -275,11 +275,12 @@ class API
     }
 
     // Supprimer un utilisateur
-    public function deleteUser()
+    public function deleteUser(WP_REST_Request $request)
     {
-        $userID = get_current_user_id();
+        //$userID = get_current_user_id();
+        $id = $request->get_param('id');
 
-        wp_delete_user($userID);
+        wp_delete_user($id);
     }
 
     // Ajouter un skatepark
@@ -439,7 +440,7 @@ class API
         ) {
             $postItem = get_post($id);
 
-            if (!$user->ID == $postItem->post_author) {
+            if ($user->ID != $postItem->post_author) {
                 return [
                     'succes' => 'not allowed'
                 ];
@@ -552,7 +553,7 @@ class API
 
             $postItem = get_post($id);
 
-            if (!$user->ID === $postItem->post_author) {
+            if ($user->ID != $postItem->post_author) {
                 return [
                     'succes' => 'not allowed'
                 ];
@@ -561,7 +562,9 @@ class API
                 wp_delete_post($id);
 
                 return [
-                    'succes' => true
+                    'succes' => true,
+                    'user' => $user->ID,
+                    'author' => $postItem->post_author
                 ];
             }
             
@@ -692,7 +695,7 @@ class API
         ) {
             $postItem = get_post($id);
 
-            if (!$user->ID == $postItem->post_author) {
+            if ($user->ID != $postItem->post_author) {
                 return [
                     'succes' => 'not allowed'
                 ];
@@ -796,7 +799,7 @@ class API
 
             $postItem = get_post($id);
 
-            if (!$user->ID == $postItem->post_author) {
+            if ($user->ID != $postItem->post_author) {
                 return [
                     'succes' => 'not allowed'
                 ];
@@ -935,7 +938,7 @@ class API
         ) {
             $postItem = get_post($id);
 
-            if (!$user->ID == $postItem->post_author) {
+            if ($user->ID != $postItem->post_author) {
                 return [
                     'succes' => 'not allowed'
                 ];
@@ -1035,7 +1038,7 @@ class API
 
             $postItem = get_post($id);
 
-            if (!$user->ID == $postItem->post_author) {
+            if ($user->ID != $postItem->post_author) {
                 return [
                     'succes' => 'not allowed'
                 ];
