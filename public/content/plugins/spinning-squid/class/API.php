@@ -277,10 +277,18 @@ class API
     // Supprimer un utilisateur
     public function deleteUser(WP_REST_Request $request)
     {
-        //$userID = get_current_user_id();
+        //For wp_delete_user() function
+        require_once(ABSPATH.'wp-admin/includes/user.php' );
+
         $id = $request->get_param('id');
 
+        // we could place an id at second param to re-assign posts 
         wp_delete_user($id);
+
+        return [
+            'value' => 'coucou',
+            'id' => $id
+        ];
     }
 
     // Ajouter un skatepark
@@ -1065,7 +1073,7 @@ class API
     public function commentSave(WP_REST_Request $request)
     {
         $comment = $request->get_param('comment');
-        $postId = $request->get_param('recipeId');
+        $postId = $request->get_param('id');
         $user = wp_get_current_user();
 
         if (
