@@ -460,9 +460,21 @@ class Plugin
     public function save_metabox($post_id){
 
         //For Skatepark Post
-        update_post_meta($post_id, 'skatepark', sanitize_text_field($_POST['skatepark']));
-        update_post_meta($post_id, 'pumptrack', sanitize_text_field($_POST['pumptrack']));
-        update_post_meta($post_id, 'streetspot', sanitize_text_field($_POST['streetspot']));
+        if (isset($_POST['skatepark'])) {
+            update_post_meta($post_id, 'skatepark', sanitize_text_field($_POST['skatepark']));
+        } else {
+            update_post_meta($post_id, 'skatepark', false);
+        }
+        if (isset($_POST['pumptrack'])) {
+            update_post_meta($post_id, 'pumptrack', sanitize_text_field($_POST['pumptrack']));
+        } else {
+            update_post_meta($post_id, 'pumptrack', false);
+        }
+        if (isset($_POST['streetspot'])) {
+            update_post_meta($post_id, 'streetspot', sanitize_text_field($_POST['streetspot']));
+        } else {
+            update_post_meta($post_id, 'streetspot', false);
+        }   
         
         if(isset($_POST['zipcode'])){
             update_post_meta($post_id, 'zipcode', sanitize_text_field($_POST['zipcode']));
@@ -474,12 +486,36 @@ class Plugin
             update_post_meta($post_id, 'city', sanitize_text_field($_POST['city']));
         }
 
-        update_post_meta($post_id, 'parking', sanitize_text_field($_POST['parking']));
-        update_post_meta($post_id, 'water', sanitize_text_field($_POST['water']));
-        update_post_meta($post_id, 'trashcan', sanitize_text_field($_POST['trashcan']));
-        update_post_meta($post_id, 'lighting', sanitize_text_field($_POST['lighting']));
-        update_post_meta($post_id, 'table', sanitize_text_field($_POST['table']));
-        update_post_meta($post_id, 'benche', sanitize_text_field($_POST['benche']));
+        if (isset($_POST['parking'])) {
+            update_post_meta($post_id, 'parking', sanitize_text_field($_POST['parking']));
+        } else {
+            update_post_meta($post_id, 'parking', false);
+        }
+        if (isset($_POST['water'])) {
+            update_post_meta($post_id, 'water', sanitize_text_field($_POST['water']));
+        } else {
+            update_post_meta($post_id, 'water', false);
+        }
+        if (isset($_POST['trashcan'])) {
+            update_post_meta($post_id, 'trashcan', sanitize_text_field($_POST['trashcan']));
+        } else {
+            update_post_meta($post_id, 'trashcan', false);
+        }
+        if (isset($_POST['lighting'])) {
+            update_post_meta($post_id, 'lighting', sanitize_text_field($_POST['lighting']));
+        } else {
+            update_post_meta($post_id, 'lighting', false);
+        }
+        if (isset($_POST['table'])) {
+            update_post_meta($post_id, 'table', sanitize_text_field($_POST['table']));
+        } else {
+            update_post_meta($post_id, 'table', false);
+        }
+        if (isset($_POST['benche'])) {
+            update_post_meta($post_id, 'benche', sanitize_text_field($_POST['benche']));
+        } else {
+            update_post_meta($post_id, 'benche', false);
+        }
 
         if(isset($_POST['state'])){
             update_post_meta($post_id, 'state', sanitize_text_field($_POST['state']));
